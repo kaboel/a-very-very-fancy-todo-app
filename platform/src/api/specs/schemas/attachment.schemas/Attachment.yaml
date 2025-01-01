@@ -1,0 +1,18 @@
+type: object
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  filename:
+    type: string
+  fileType:
+    type: string
+  path:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time

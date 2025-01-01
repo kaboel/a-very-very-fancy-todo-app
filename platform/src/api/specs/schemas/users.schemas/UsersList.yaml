@@ -1,0 +1,4 @@
+type: array
+description: List of users profile
+items:
+  $ref: "./UserProfile.yaml"

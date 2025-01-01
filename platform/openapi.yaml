@@ -1,0 +1,276 @@
+openapi: 3.0.3
+servers:
+  - url: http://localhost:3000/api
+    description: Local dev environment
+info:
+  title: A Very Very Fancy Todo App's Speccccsss
+  description: Duh?
+  version: 1.0.0
+tags:
+  - name: Base
+    description: Base level endpoints `/`
+  - name: Users
+    description: User model related endpoints `/users`
+  - name: Tasks
+    description: Task model related endpoints `/tasks`
+paths: {}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ResourceId:
+      description: Resource Unique Identifier
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    SearchText:
+      description: Search text
+      in: query
+      name: search
+      schema:
+        type: string
+  schemas:
+    DeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Delete message
+        id:
+          type: string
+          description: Deleted resource id
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        details:
+          type: string
+          description: Detailed error message
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        filename:
+          type: string
+        fileType:
+          type: string
+        path:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Patient:
+      type: object
+      description: Patient model schema
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        status:
+          type: string
+        creatorId:
+          type: string
+        patientId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TaskCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the task
+        description:
+          type: string
+          description: A detailed description of the task
+        deadline:
+          type: string
+          format: date-time
+          description: The deadline for the task
+        patientId:
+          type: string
+          description: The ID of the associated patient (optional)
+          nullable: true
+        creatorId:
+          type: string
+          description: The ID of the user who created the task
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the attachment file
+              filename:
+                type: string
+                description: The filename of the attachment
+              fileType:
+                type: string
+                description: The type of the file (e.g., pdf, image)
+              path:
+                type: string
+                description: The path where the attachment is stored
+          description: A list of attachments to associate with the task (optional)
+          nullable: true
+    TaskResponse:
+      type: object
+      description: Task object including attachments
+      properties:
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+      allOf:
+        - $ref: '#/components/schemas/Task'
+    TaskUpdateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the task (should match the {id} parameter)
+        title:
+          type: string
+          description: The updated title of the task
+          nullable: true
+        description:
+          type: string
+          description: The updated description of the task
+          nullable: true
+        deadline:
+          type: string
+          format: date-time
+          description: The updated deadline of the task
+          nullable: true
+        patientId:
+          type: string
+          description: The updated patient ID related to the task
+          nullable: true
+        attachmentIds:
+          type: array
+          items:
+            type: string
+          description: List of attachments related to the task
+          nullable: true
+        status:
+          type: string
+          enum:
+            - pending
+            - in-progress
+            - completed
+            - cancelled
+          description: The updated status of the task
+          nullable: true
+    UsersList:
+      type: array
+      description: List of users profile
+      items:
+        $ref: '#/components/schemas/UserProfile'
+    UserAccount:
+      type: object
+      description: Full User model schema
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        doctorNumber:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    UserProfile:
+      type: object
+      description: Partial User model schema excluding password field for security
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        doctorNumber:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserRegisterRequest:
+      type: object
+      description: User registration request payload
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+    UserUpdateRequest:
+      type: object
+      description: User update request payload
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string

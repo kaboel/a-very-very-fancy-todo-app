@@ -1,0 +1,5 @@
+description: Search text
+in: query
+name: search
+schema:
+  type: string

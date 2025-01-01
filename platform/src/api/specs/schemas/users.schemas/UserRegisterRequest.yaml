@@ -1,0 +1,13 @@
+type: object
+description: User registration request payload
+properties:
+  firstname:
+    type: string
+  lastname:
+    type: string
+  email:
+    type: string
+  password:
+    type: string
+  role:
+    type: string

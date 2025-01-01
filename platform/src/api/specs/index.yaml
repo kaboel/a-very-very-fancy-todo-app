@@ -1,0 +1,54 @@
+openapi: 3.0.3
+servers:
+  - url: http://localhost:3000/api
+    description: Local dev environment
+info:
+  title: A Very Very Fancy Todo App's Speccccsss
+  description: Duh?
+  version: "1.0.0"
+tags:
+  - name: Base
+    description: Base level endpoints `/`
+  - name: Users
+    description: User model related endpoints `/users`
+  - name: Tasks
+    description: Task model related endpoints `/tasks`
+paths: {}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ResourceId:
+      $ref: "./parameters/ResourceId.yaml"
+    SearchText:
+      $ref: "./parameters/SearchText.yaml"
+  schemas:
+    DeleteResponse:
+      $ref: "./schemas/DeleteResponse.yaml"
+    ErrorResponse:
+      $ref: "./schemas/ErrorResponse.yaml"
+    Attachment:
+      $ref: "./schemas/attachment.schemas/Attachment.yaml"
+    Patient:
+      $ref: "./schemas/patient.schemas/Patient.yaml"
+    Task:
+      $ref: "./schemas/task.schemas/Task.yaml"
+    TaskCreateRequest:
+      $ref: "./schemas/task.schemas/TaskCreateRequest.yaml"
+    TaskResponse:
+      $ref: "./schemas/task.schemas/TaskResponse.yaml"
+    TaskUpdateRequest:
+      $ref: "./schemas/task.schemas/TaskUpdateRequest.yaml"
+    UsersList:
+      $ref: "./schemas/users.schemas/UsersList.yaml"
+    UserAccount:
+      $ref: "./schemas/users.schemas/UserAccount.yaml"
+    UserProfile:
+      $ref: "./schemas/users.schemas/UserProfile.yaml"
+    UserRegisterRequest:
+      $ref: "./schemas/users.schemas/UserRegisterRequest.yaml"
+    UserUpdateRequest:
+      $ref: "./schemas/users.schemas/UserUpdateRequest.yaml"

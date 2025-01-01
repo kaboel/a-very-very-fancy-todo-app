@@ -1,0 +1,9 @@
+type: object
+description: Task object including attachments
+properties:
+  attachments:
+    type: array
+    items:
+      $ref: "../attachment.schemas/Attachment.yaml"
+allOf:
+  - $ref: "./Task.yaml"

@@ -1,0 +1,38 @@
+type: object
+properties:
+  title:
+    type: string
+    description: The title of the task
+  description:
+    type: string
+    description: A detailed description of the task
+  deadline:
+    type: string
+    format: date-time
+    description: The deadline for the task
+  patientId:
+    type: string
+    description: The ID of the associated patient (optional)
+    nullable: true
+  creatorId:
+    type: string
+    description: The ID of the user who created the task
+  attachments:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the attachment file
+        filename:
+          type: string
+          description: The filename of the attachment
+        fileType:
+          type: string
+          description: The type of the file (e.g., pdf, image)
+        path:
+          type: string
+          description: The path where the attachment is stored
+    description: A list of attachments to associate with the task (optional)
+    nullable: true

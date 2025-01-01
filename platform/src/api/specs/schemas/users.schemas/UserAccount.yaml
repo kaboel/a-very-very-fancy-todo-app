@@ -1,0 +1,21 @@
+type: object
+description: Full User model schema
+properties:
+  id:
+    type: string
+  firstname:
+    type: string
+  lastname:
+    type: string
+  email:
+    type: string
+  password:
+    type: string
+  role:
+    type: string
+  doctorNumber:
+    type: number
+  createdAt:
+    type: string
+  updatedAt:
+    type: string

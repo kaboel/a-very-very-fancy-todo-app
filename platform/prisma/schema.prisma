@@ -1,0 +1,81 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  password     String
+  role         UserRole
+  firstname    String
+  lastname     String
+  doctorNumber Int?      @unique
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+
+  // relationships
+  patients Patient[] @relation("DoctorPatients") // Patients that are under the Doctors care
+  tasks    Task[] // Tasks created by the user
+}
+
+model Patient {
+  id        String    @id @default(uuid())
+  firstname String
+  lastname  String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  // relationships
+  tasks   Task[] // Tasks related to the patient
+  doctors User[] @relation("DoctorPatients") // Doctors associated with the patient
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  deadline    DateTime?
+  status      TaskStatus
+  createdAt   DateTime?  @default(now())
+  updatedAt   DateTime?  @updatedAt
+
+  // relationships
+  attachments Attachment[] // External resources attached to the task (i.e PDF, image, etc.)
+  creator     User         @relation(fields: [creatorId], references: [id])
+  creatorId   String
+  patient     Patient?     @relation(fields: [patientId], references: [id])
+  patientId   String?
+}
+
+model Attachment {
+  id        String    @id @default(uuid())
+  filename  String
+  mimetype  String
+  path      String
+  size      String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  // relationships
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade) // Delete attachments if the related task is deleted
+}
+
+enum UserRole {
+  DOCTOR
+  NURSE
+  SECRETARY
+}
+
+enum TaskStatus {
+  NEW
+  INPROGRESS
+  COMPLETE
+  OVERDUE
+}

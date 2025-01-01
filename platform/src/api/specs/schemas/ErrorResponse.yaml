@@ -1,0 +1,8 @@
+type: object
+properties:
+  message:
+    type: string
+    description: Error message
+  details:
+    type: string
+    description: Detailed error message

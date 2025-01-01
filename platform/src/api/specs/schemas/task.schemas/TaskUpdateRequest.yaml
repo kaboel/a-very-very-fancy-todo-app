@@ -1,0 +1,33 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the task (should match the {id} parameter)
+  title:
+    type: string
+    description: The updated title of the task
+    nullable: true
+  description:
+    type: string
+    description: The updated description of the task
+    nullable: true
+  deadline:
+    type: string
+    format: date-time
+    description: The updated deadline of the task
+    nullable: true
+  patientId:
+    type: string
+    description: The updated patient ID related to the task
+    nullable: true
+  attachmentIds:
+    type: array
+    items:
+      type: string
+    description: List of attachments related to the task
+    nullable: true
+  status:
+    type: string
+    enum: [pending, in-progress, completed, cancelled]
+    description: The updated status of the task
+    nullable: true

@@ -1,0 +1,21 @@
+type: object
+description: Partial User model schema excluding password field for security
+properties:
+  id:
+    type: string
+  firstname:
+    type: string
+  lastname:
+    type: string
+  email:
+    type: string
+  role:
+    type: string
+  doctorNumber:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
