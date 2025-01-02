@@ -19,3 +19,7 @@ interface AuthPayload {
   email: string
   role: string
 }
+
+type UserRole = "doctor" | "secretary" | "nurse"
+
+type TaskStatus = "new" | "inprogress" | "complete" | "overdue"

@@ -3,9 +3,9 @@ description: Patient model schema
 properties:
   id:
     type: string
-  firstname:
+  name:
     type: string
-  lastname:
+  email:
     type: string
   createdAt:
     type: string

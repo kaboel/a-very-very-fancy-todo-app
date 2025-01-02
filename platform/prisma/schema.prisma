@@ -9,73 +9,92 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
+  id           String            @id @default(uuid())
+  name         String
+  email        String            @unique
   password     String
-  role         UserRole
-  firstname    String
-  lastname     String
-  doctorNumber Int?      @unique
-  createdAt    DateTime? @default(now())
-  updatedAt    DateTime? @updatedAt
-
-  // relationships
-  patients Patient[] @relation("DoctorPatients") // Patients that are under the Doctors care
-  tasks    Task[] // Tasks created by the user
+  role         String
+  doctorNumber Int?              @unique
+  createdAt    DateTime?         @default(now())
+  updatedAt    DateTime?         @updatedAt
+  // Relationships
+  patients     PatientOnDoctor[]
+  tasks        Task[]
+  assignments  TaskAssignment[]
 }
 
 model Patient {
-  id        String    @id @default(uuid())
-  firstname String
-  lastname  String
-  createdAt DateTime? @default(now())
-  updatedAt DateTime? @updatedAt
+  id        String            @id @default(uuid())
+  name      String
+  phone     String
+  address   String
+  createdAt DateTime?         @default(now())
+  updatedAt DateTime?         @updatedAt
+  // Relationships
+  mentions  Task[]
+  doctors   PatientOnDoctor[]
+}
 
-  // relationships
-  tasks   Task[] // Tasks related to the patient
-  doctors User[] @relation("DoctorPatients") // Doctors associated with the patient
+model PatientOnDoctor {
+  id        String    @id @default(uuid())
+  createdAt DateTime? @default(now())
+  doctorId  String
+  patientId String
+  // Relationships
+  doctor    User      @relation(fields: [doctorId], references: [id])
+  patient   Patient   @relation(fields: [patientId], references: [id])
+
+  @@unique([doctorId, patientId])
 }
 
 model Task {
-  id          String     @id @default(uuid())
+  id          String           @id @default(uuid())
   title       String
   description String?
-  deadline    DateTime?
-  status      TaskStatus
-  createdAt   DateTime?  @default(now())
-  updatedAt   DateTime?  @updatedAt
-
-  // relationships
-  attachments Attachment[] // External resources attached to the task (i.e PDF, image, etc.)
-  creator     User         @relation(fields: [creatorId], references: [id])
+  completed   Boolean          @default(false)
   creatorId   String
-  patient     Patient?     @relation(fields: [patientId], references: [id])
   patientId   String?
+  deadline    DateTime?
+  createdAt   DateTime?        @default(now())
+  updatedAt   DateTime?        @updatedAt
+  // Relationships
+  creator     User             @relation(fields: [creatorId], references: [id])
+  patient     Patient?         @relation(fields: [patientId], references: [id])
+  assignments TaskAssignment[]
+  resources   TaskResource[]
 }
 
-model Attachment {
+model TaskAssignment {
   id        String    @id @default(uuid())
-  filename  String
-  mimetype  String
-  path      String
-  size      String
+  taskId    String
+  userId    String
   createdAt DateTime? @default(now())
-  updatedAt DateTime? @updatedAt
+  // Relationships
+  task      Task      @relation(fields: [taskId], references: [id])
+  assignee  User      @relation(fields: [userId], references: [id])
 
-  // relationships
-  taskId String?
-  task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade) // Delete attachments if the related task is deleted
+  @@unique([taskId, userId])
 }
 
-enum UserRole {
-  DOCTOR
-  NURSE
-  SECRETARY
+model TaskResource {
+  id             String       @id @default(uuid())
+  originalName   String
+  filename       String
+  mimetype       String
+  size           Int
+  path           String
+  taskId         String
+  resourceTypeId String
+  createdAt      DateTime?    @default(now())
+  // Relationships
+  task           Task         @relation(fields: [taskId], references: [id])
+  resourceType   ResourceType @relation(fields: [resourceTypeId], references: [id])
 }
 
-enum TaskStatus {
-  NEW
-  INPROGRESS
-  COMPLETE
-  OVERDUE
+model ResourceType {
+  id           String         @id @default(uuid())
+  type         String
+  createdAt    DateTime?      @default(now())
+  // Relationships
+  taskResource TaskResource[]
 }
