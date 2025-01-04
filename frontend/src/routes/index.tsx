@@ -1,18 +1,33 @@
 import { Suspense } from "react"
-import { BrowserRouter as Router, Routes, Route } from "react-router"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router"
 import AuthRoutes from "./auth/routes"
+import AppRoutes from "./app/routes"
 import NotFoundPage from "./404Page"
-import DashboardPage from "./DashboardPage"
+import { useSelector } from "react-redux"
+import { selectIsAuthenticated } from "../redux/slices/authSlice"
 
-export default function AppRoutes() {
+export default function MainRoutes() {
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+
   return (
     <Router>
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
-          <Route path="/auth/*" element={<AuthRoutes />} />
-          <Route path="/" element={<DashboardPage />}></Route>
+          <Route
+            path="/auth/*"
+            element={
+              !isAuthenticated ? <AuthRoutes /> : <Navigate to="/tasks" />
+            }
+          />
+          <Route
+            path="/*"
+            element={
+              isAuthenticated ? <AppRoutes /> : <Navigate to="/auth/login" />
+            }
+          />
 
-          <Route path="*" element={<NotFoundPage />}></Route>
+          {/* 404 Page */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </Router>

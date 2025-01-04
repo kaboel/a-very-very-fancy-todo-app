@@ -1,9 +1,7 @@
 type: object
 description: User registration request payload
 properties:
-  firstname:
-    type: string
-  lastname:
+  name:
     type: string
   email:
     type: string

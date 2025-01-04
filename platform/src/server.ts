@@ -1,8 +1,9 @@
 import fs from "fs"
 import path from "path"
-import express, { ErrorRequestHandler } from "express"
+import express from "express"
 import { initialize } from "express-openapi"
 import dotenv from "dotenv"
+import cors from "cors"
 import * as swaggerUi from "swagger-ui-express"
 import errorMiddleware from "./middlewares/errorMiddleware"
 import uploadMiddleware from "./middlewares/uploadMiddleware"
@@ -14,7 +15,16 @@ export async function init() {
   const apiDoc = path.resolve(__dirname, "../openapi.yaml")
   const paths = path.resolve(__dirname, "./api/handlers")
 
+  app.use(
+    cors({
+      origin: "http://localhost:8000",
+      methods: "GET,PUT,PATCH,POST,DELETE",
+      credentials: true,
+      optionsSuccessStatus: 204,
+    })
+  )
   app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
 
   await initialize({
     app,

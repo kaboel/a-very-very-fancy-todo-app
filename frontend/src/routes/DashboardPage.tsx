@@ -1,7 +1,12 @@
-import { Box, Grid2 as Grid, Paper, styled } from "@mui/material"
+import { Outlet } from "react-router"
+import { Box, Divider, Grid2 as Grid, Paper, styled } from "@mui/material"
 import HomePaper from "../components/HomePaper"
 import ProfileBox from "../components/ProfileBox"
-import { UserRoles } from "../helpers/constants"
+import TasksSummary from "../components/TasksSummary"
+import Navigation from "../components/Navigation"
+import { useSelector } from "react-redux"
+import { selectCurrentUser } from "../redux/slices/authSlice"
+import { useGetUsersQuery } from "../redux/apis/usersApi"
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -12,24 +17,27 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }))
 
 export default function DashboardPage() {
-  const userData = {
-    firstname: "Faiq",
-    lastname: "Allam",
-    email: "faiqxallam@gmail.com",
-    role: UserRoles.DOCTOR,
-    doctorNumber: 2241234,
-  }
+  const { isLoading } = useGetUsersQuery()
+  const userData = useSelector(selectCurrentUser)
 
-  return (
+  return !userData || isLoading ? (
+    <div>Loading...</div>
+  ) : (
     <HomePaper>
-      <Grid container spacing={1} padding={0}>
+      <Grid container padding={0}>
         <Grid size="grow">
           <StyledPaper>
-            <ProfileBox loading={true} profile={userData} />
+            <ProfileBox loading={false} profile={userData} />
+            <Divider />
+            <TasksSummary />
+            <Divider />
+            <Navigation />
           </StyledPaper>
         </Grid>
         <Grid size={9}>
-          <Box>ContentSection</Box>
+          <Box sx={{ p: 1, px: 2, maxHeight: "700px", overflowY: "auto" }}>
+            <Outlet />
+          </Box>
         </Grid>
       </Grid>
     </HomePaper>

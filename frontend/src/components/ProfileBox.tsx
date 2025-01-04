@@ -1,69 +1,82 @@
-import { Avatar, Box, Typography, Chip, Skeleton } from "@mui/material"
-import { UserRoles } from "../helpers/constants"
-import { stringToColor } from "../helpers/miscellaneos"
-
-interface IUserProfile {
-  firstname: string
-  lastname: string
-  email: string
-  role: UserRoles
-  doctorNumber?: number
-}
+import {
+  Avatar,
+  Box,
+  Typography,
+  Chip,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+} from "@mui/material"
+import { USER_ROLES } from "../helpers/constants"
+import { initials, stringToColor } from "../helpers/miscellaneos"
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts"
+import ExitToAppIcon from "@mui/icons-material/ExitToApp"
+import { useNavigate } from "react-router"
+import { IUser } from "../helpers/types"
+import { logout } from "../redux/slices/authSlice"
+import { useDispatch } from "react-redux"
 
 interface ProfileBoxProps {
   loading: boolean
-  profile: IUserProfile
+  profile: IUser
 }
 
-export default function ProfileBox({ loading, profile }: ProfileBoxProps) {
-  const { firstname, lastname, email, role } = profile
-  const fullname = `${firstname} ${lastname}`
-  const initials = `${firstname[0]}${lastname[0]}`
+export default function ProfileBox({ profile }: ProfileBoxProps) {
+  const dispatch = useDispatch()
+  const { name, email, role, doctorNumber } = profile
 
-  return !loading ? (
+  const handleLogout = () => {
+    dispatch(logout())
+    navigate("/auth/login")
+  }
+
+  const navigate = useNavigate()
+  return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        padding: 5,
+        padding: 3,
         alignItems: "center",
       }}
     >
       <Avatar
         sx={{
-          bgColor: stringToColor(fullname),
+          bgcolor: stringToColor(name),
           width: 100,
           height: 100,
           fontSize: 35,
           mb: 2,
         }}
       >
-        {initials}
+        {initials(name)}
       </Avatar>
-      <Typography variant="h5">{fullname}</Typography>
-      {role === UserRoles.DOCTOR && (
+      <Typography variant="h5">{name}</Typography>
+      {role === USER_ROLES.DOCTOR && (
         <Chip
           variant="outlined"
           color="primary"
           sx={{ fontWeight: "600", mb: 1, mt: 1 }}
-          label="Doctor"
+          label={`D-${doctorNumber}`}
         />
       )}
       <Typography variant="body2"> {email} </Typography>
-    </Box>
-  ) : (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        padding: 5,
-        alignItems: "center",
-      }}
-    >
-      <Skeleton variant="circular" width={100} height={100} sx={{ mb: 2 }} />
-      <Skeleton width={120} height={40} />
-      <Skeleton width={100} height={40} sx={{ mt: 1, mb: 1 }} />
-      <Skeleton width={200} />
+      <Grid container>
+        <Grid>
+          <Tooltip title="Profile" placement="left">
+            <IconButton onClick={() => navigate("/profile")}>
+              <ManageAccountsIcon />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+        <Grid>
+          <Tooltip title="Logout" placement="right">
+            <IconButton color="error" onClick={handleLogout}>
+              <ExitToAppIcon />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </Grid>
     </Box>
   )
 }

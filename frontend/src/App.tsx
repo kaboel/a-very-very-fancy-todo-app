@@ -1,5 +1,6 @@
 import { styled } from "@mui/material"
-import AppRoutes from "./routes"
+import Routes from "./routes"
+import { useValidateTokenQuery } from "./redux/apis/authApi"
 
 // Outer wrapper with a gradient background
 const BaseContainer = styled("div")(() => ({
@@ -12,9 +13,11 @@ const BaseContainer = styled("div")(() => ({
 }))
 
 export default function App() {
+  useValidateTokenQuery()
+
   return (
     <BaseContainer>
-      <AppRoutes />
+      <Routes />
     </BaseContainer>
   )
 }

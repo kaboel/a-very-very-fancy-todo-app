@@ -1,62 +1,37 @@
 import { PrismaClient, User } from "@prisma/client"
-import { IUserProfile, IUserRegister, IUserUpdate } from "./__dto__/users.dto"
+import { IUserProfile, IUserRegister, IUserUpdate } from "./__dtos__/users.dto"
+
+const prisma = new PrismaClient()
 
 export class UserPersistence {
-  private db: any
-
-  constructor() {
-    const prisma = new PrismaClient()
-
-    this.db = prisma.user
-  }
-
-  async createUser(data: IUserRegister): Promise<IUserProfile> {
-    const { email, password, firstname, lastname, role, doctorNumber } = data
+  async createUser(data: IUserRegister): Promise<User> {
+    const { email, password, name, role, doctorNumber } = data
     try {
-      const newUser = await this.db.create({
+      const newUser = await prisma.user.create({
         data: {
           email,
           password,
-          firstname,
-          lastname,
+          name,
           role,
           doctorNumber,
-        },
-        select: {
-          id: true,
-          email: true,
-          firstname: true,
-          lastname: true,
-          role: true,
-          doctorNumber: true,
-          createdAt: true,
-          updatedAt: true,
         },
       })
       return newUser
     } catch (error: any) {
+      console.error(error)
       throw new Error(error.toString())
     }
   }
 
-  async getUser(id: string): Promise<IUserProfile | Error> {
+  async getUser(id: string): Promise<User> {
     try {
-      const user = await this.db.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id },
-        select: {
-          id: true,
-          email: true,
-          firstname: true,
-          lastname: true,
-          role: true,
-          doctorNumber: true,
-        },
       })
 
       if (!user) {
         throw new Error(`User with id ${id} not found`)
       }
-
       return user
     } catch (error: any) {
       throw new Error(error.toString())
@@ -65,7 +40,7 @@ export class UserPersistence {
 
   async getUserForLogin(email: string): Promise<User> {
     try {
-      const user = await this.db.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email },
       })
 
@@ -80,14 +55,14 @@ export class UserPersistence {
   }
 
   async getUsers(searchText?: string): Promise<IUserProfile[] | []> {
-    const users = await this.db.findMany({
+    const users = await prisma.user.findMany({
       where: {
         ...(searchText && {
-          firstname: {
+          email: {
             search: searchText,
             mode: "insensitive",
           },
-          lastname: {
+          name: {
             search: searchText,
             mode: "insensitive",
           },
@@ -99,15 +74,14 @@ export class UserPersistence {
 
   async updateUser(data: IUserUpdate): Promise<IUserProfile> {
     try {
-      const { id, email, password, firstname, lastname } = data
+      const { id, email, password, name } = data
 
-      const updatedUser = await this.db.update({
+      const updatedUser = await prisma.user.update({
         where: { id },
         data: {
           ...(email && { email }),
           ...(password && { password }),
-          ...(firstname && { password }),
-          ...(lastname && { lastname }),
+          ...(name && { name }),
         },
       })
       return updatedUser
@@ -118,9 +92,9 @@ export class UserPersistence {
 
   async deleteUser(id: string): Promise<{ id: string }> {
     try {
-      const deletedUser = await this.db.delete({
+      const deletedUser = await prisma.user.delete({
         where: { id },
-        select: { id },
+        select: { id: true },
       })
 
       if (!deletedUser) {

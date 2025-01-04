@@ -1,0 +1,7 @@
+type: object
+description: User login request payload
+properties:
+  email:
+    type: string
+  password:
+    type: string

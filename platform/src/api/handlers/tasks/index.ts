@@ -1,24 +1,34 @@
 import { Request, Response } from "express"
-import { AttachmentPersistence } from "../../../persistence/attachments"
+import { ResourcePersistence } from "../../../persistence/resources"
 import { TaskPersistence } from "../../../persistence/tasks"
-import { ITaskGetMany } from "../../../persistence/__dto__/tasks.dto"
+import authMiddleware from "../../../middlewares/authMiddleware"
 
-const { bulkCreateAttachments } = new AttachmentPersistence()
+import type {
+  ITaskCreate,
+  ITaskGetMany,
+} from "../../../persistence/__dtos__/tasks.dto"
+import type { TaskResource } from "@prisma/client"
+
+const { bulkCreateResources } = new ResourcePersistence()
 const { createTask, getTasks, updateTask } = new TaskPersistence()
 
-export async function get(req: Request, res: Response) {
-  try {
-    const data: ITaskGetMany = req.query
-    const tasks = await getTasks(data)
-    if (!tasks) {
-      res.status(404).json({ message: "Task not found!" })
+export const get: any = [
+  authMiddleware,
+  async function get(req: Request, res: Response) {
+    try {
+      const data: ITaskGetMany = req.query
+
+      const tasks = await getTasks(data)
+      if (!tasks) {
+        res.status(404).json({ message: "Task not found!" })
+      }
+      res.status(200).json(tasks)
+    } catch (error: any) {
+      res.status(500).json({ message: error.toString() })
     }
-    res.status(200).json(tasks)
-  } catch (error: any) {
-    res.status(500).json({ message: error.toString() })
-  }
-  return
-}
+    return
+  },
+]
 get.apiDoc = {
   tags: ["Tasks"],
   summary: "Get Tasks",
@@ -52,6 +62,15 @@ get.apiDoc = {
         type: "string",
       },
     },
+    {
+      name: "assignedToMe",
+      in: "query",
+      required: false,
+      description: "Filter tasks by assignment",
+      schema: {
+        type: "string",
+      },
+    },
   ],
   responses: {
     "200": {
@@ -80,36 +99,32 @@ get.apiDoc = {
   },
 }
 
-export async function post(req: Request, res: Response) {
-  try {
-    const {
-      title,
-      description,
-      deadline,
-      patientId = null,
-      creatorId,
-    } = req.body
-    const attachments = req.files as Express.Multer.File[]
-    let attachmentIds: string[] = []
-
-    if (attachments?.length) {
-      attachmentIds = await bulkCreateAttachments(attachments)
+export const post: any = [
+  authMiddleware,
+  async function post(req: Request, res: Response) {
+    try {
+      const body = req.body
+      const files = req.files
+      const resources = files?.map((file) => {
+        return {
+          originalName: file.originalname,
+          filename: file.filename,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: `/uploads/${file.filename}`,
+        }
+      })
+      const task = await createTask({
+        ...body,
+        resources,
+      })
+      res.status(200).json(task)
+      res.status(204).send()
+    } catch (error: any) {
+      res.status(500).json({ message: error.toString() })
     }
-
-    const newTask = await createTask({
-      title,
-      description,
-      deadline,
-      patientId,
-      attachmentIds,
-      creatorId,
-    })
-
-    res.status(200).json(newTask)
-  } catch (error: any) {
-    res.status(500).json({ message: error.toString() })
-  }
-}
+  },
+]
 post.apiDoc = {
   tags: ["Tasks"],
   summary: "Create a new task with optional attachments",
@@ -117,7 +132,7 @@ post.apiDoc = {
   requestBody: {
     required: true,
     content: {
-      "application/json": {
+      "multipart/form-data": {
         schema: {
           $ref: "#/components/schemas/TaskCreateRequest",
         },
@@ -125,15 +140,8 @@ post.apiDoc = {
     },
   },
   responses: {
-    "200": {
+    "204": {
       description: "Task successfully created",
-      content: {
-        "application/json": {
-          schema: {
-            $ref: "#/components/schemas/TaskResponse",
-          },
-        },
-      },
     },
     "400": {
       description: "Missing required fields or invalid input",

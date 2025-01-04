@@ -1,17 +1,11 @@
 import { PrismaClient, Patient } from "@prisma/client"
-import { IPatientCreate, IPatientUpdate } from "./__dto__/patients.dto"
+import { IPatientCreate, IPatientUpdate } from "./__dtos__/patients.dto"
+
+const prisma = new PrismaClient()
 
 export class PatientPersistence {
-  private db: any
-
-  constructor() {
-    const prisma = new PrismaClient()
-
-    this.db = prisma.patient
-  }
-
-  async createPatient(data: IPatientCreate): Promise<Patient> {
-    const newPatient = await this.db.create({
+  async createPatient(data: Partial<Patient>): Promise<Patient> {
+    const newPatient = await prisma.patient.create({
       data,
     })
     return newPatient
@@ -19,7 +13,7 @@ export class PatientPersistence {
 
   async getPatient(id: string): Promise<Patient> {
     try {
-      const patient = await this.db.findUnique({
+      const patient = await prisma.patient.findUnique({
         where: {
           id,
         },
@@ -34,18 +28,17 @@ export class PatientPersistence {
   }
 
   async getPatients(searchText?: string): Promise<Patient[]> {
-    const patients = await this.db.findMany({
+    const patients = await prisma.patient.findMany({
       where: {
         ...(searchText && {
-          firstname: {
-            search: searchText,
-            mode: "insensitive",
-          },
-          lastname: {
+          name: {
             search: searchText,
             mode: "insensitive",
           },
         }),
+      },
+      include: {
+        doctors: true,
       },
     })
     return patients
@@ -53,7 +46,7 @@ export class PatientPersistence {
 
   async updatePatient({ id, ...payload }: IPatientUpdate): Promise<Patient> {
     try {
-      const updated = await this.db.update({
+      const updated = await prisma.patient.update({
         where: { id },
         data: payload,
       })
@@ -68,9 +61,9 @@ export class PatientPersistence {
 
   async deletePatient(id: string): Promise<{ id: string }> {
     try {
-      const deleted = await this.db.delete({
+      const deleted = await prisma.patient.delete({
         where: { id },
-        select: { id },
+        select: { id: true },
       })
       if (!deleted) {
         throw new Error(`Patient with id ${id} cannot be deleted`)

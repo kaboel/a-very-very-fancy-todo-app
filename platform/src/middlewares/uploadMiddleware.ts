@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto"
 import { Request, Response, NextFunction } from "express"
 import multer, { StorageEngine } from "multer"
 import path from "path"
@@ -10,7 +11,7 @@ const storage: StorageEngine = multer.diskStorage({
     cb(null, dest)
   },
   filename: (_, file, cb) => {
-    const filename = Date.now() + file.originalname
+    const filename = `${randomUUID()}${path.extname(file.originalname)}`
     cb(null, filename)
   },
 })
@@ -20,8 +21,9 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ): void => {
+  console.log(`Uploading type: ${file.mimetype}`)
   if (!allowedTypes.includes(file.mimetype)) {
-    cb(null, false)
+    return cb(null, false)
   }
   cb(null, true)
 }
@@ -29,18 +31,17 @@ const fileFilter = (
 const upload = multer({
   storage,
   fileFilter,
-}).array("attachments")
+}).array("resources")
 
 function uploadMiddleware(req: Request, res: Response, next: NextFunction) {
   upload(req, res, (error: any) => {
     if (error instanceof multer.MulterError) {
+      console.error(error)
       return res.status(400).json({ message: error.message })
     }
     if (error) {
+      console.error(error)
       return res.status(500).json({ message: "Upload error" })
-    }
-    if (req.files) {
-      req.body.attachments = req.files
     }
     next()
   })

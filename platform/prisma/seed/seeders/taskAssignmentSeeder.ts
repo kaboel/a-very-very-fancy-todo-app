@@ -6,19 +6,28 @@ async function seedTaskAssignment(userIds: string[]) {
     const tasks = await prisma.task.findMany({
       select: { id: true, creatorId: true },
     })
-    const relationships = tasks.map((task) => {
+    const relationships = tasks.flatMap((task) => {
       const nonCreatorIds = userIds.filter(
         (userId) => task.creatorId !== userId
       )
-      const userId =
-        nonCreatorIds[Math.floor(Math.random() * nonCreatorIds.length)]
-      return {
+      const numberOfAssignments = Math.floor(Math.random() * 3) + 1
+      const assignedUserIds = Array.from(
+        new Set(
+          Array.from(
+            { length: numberOfAssignments },
+            () =>
+              nonCreatorIds[Math.floor(Math.random() * nonCreatorIds.length)]
+          )
+        )
+      )
+      return assignedUserIds.map((userId) => ({
         taskId: task.id,
         userId,
-      }
+      }))
     })
     await prisma.taskAssignment.createMany({
       data: relationships,
+      skipDuplicates: true,
     })
     console.log("TaskAssignment seeded!")
   } catch (error: any) {

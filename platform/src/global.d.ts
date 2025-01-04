@@ -1,3 +1,6 @@
+import { Request, Response } from "express"
+import { User } from "@prisma/client"
+
 declare namespace NodeJS {
   interface ProcessEnv {
     SERVER_PORT: string
@@ -9,17 +12,17 @@ declare namespace NodeJS {
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload
+      user?: User
+      files?: Express.Multer.File[]
     }
   }
 }
 
-interface AuthPayload {
-  id: string
-  email: string
-  role: string
+export interface OpenApiHandler {
+  (req: Request, res: Response): Promise<void>
+  apiDoc?: object
 }
 
-type UserRole = "doctor" | "secretary" | "nurse"
+export type IUserRole = "doctor" | "nurse" | "secretary"
 
-type TaskStatus = "new" | "inprogress" | "complete" | "overdue"
+export type ITaskStatus = "new" | "complete" | "overdue"

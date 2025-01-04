@@ -7,12 +7,12 @@ info:
   description: Duh?
   version: 1.0.0
 tags:
-  - name: Base
-    description: Base level endpoints `/`
   - name: Users
     description: User model related endpoints `/users`
   - name: Tasks
     description: Task model related endpoints `/tasks`
+  - name: Patients
+    description: Patient model related endpoints `/patients`
 paths: {}
 components:
   securitySchemes:
@@ -31,45 +31,97 @@ components:
     SearchText:
       description: Search text
       in: query
-      name: search
+      name: searchText
       schema:
         type: string
   schemas:
-    DeleteResponse:
+    User:
       type: object
-      properties:
-        message:
-          type: string
-          description: Delete message
-        id:
-          type: string
-          description: Deleted resource id
-    ErrorResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: Error message
-        details:
-          type: string
-          description: Detailed error message
-    Attachment:
-      type: object
+      description: Full User model schema
       properties:
         id:
           type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        doctorNumber:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    UsersList:
+      type: array
+      description: List of users profile
+      items:
+        $ref: '#/components/schemas/User'
+    UserLoginRequest:
+      type: object
+      description: User login request payload
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    UserRegisterRequest:
+      type: object
+      description: User registration request payload
+      properties:
         name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+    UserUpdateRequest:
+      type: object
+      description: User update request payload
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    TaskResource:
+      type: object
+      properties:
+        id:
+          type: string
+        originalName:
           type: string
         filename:
           type: string
-        fileType:
+        mimetype:
           type: string
+        size:
+          type: number
         path:
+          type: string
+        resourceTypeId:
           type: string
         createdAt:
           type: string
           format: date-time
-        updatedAt:
+    ResourceType:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        createdAt:
           type: string
           format: date-time
     Patient:
@@ -78,9 +130,11 @@ components:
       properties:
         id:
           type: string
-        firstname:
+        name:
           type: string
-        lastname:
+        phone:
+          type: string
+        address:
           type: string
         createdAt:
           type: string
@@ -97,11 +151,11 @@ components:
           type: string
         description:
           type: string
+        status:
+          type: string
         deadline:
           type: string
           format: date-time
-        status:
-          type: string
         creatorId:
           type: string
         patientId:
@@ -117,48 +171,41 @@ components:
       properties:
         title:
           type: string
-          description: The title of the task
         description:
           type: string
-          description: A detailed description of the task
         deadline:
           type: string
           format: date-time
-          description: The deadline for the task
-        patientId:
-          type: string
-          description: The ID of the associated patient (optional)
-          nullable: true
         creatorId:
           type: string
-          description: The ID of the user who created the task
-        attachments:
+        patientId:
+          type: string
+          nullable: true
+        assigneeIds:
           type: array
           items:
-            type: object
-            properties:
-              name:
-                type: string
-                description: The name of the attachment file
-              filename:
-                type: string
-                description: The filename of the attachment
-              fileType:
-                type: string
-                description: The type of the file (e.g., pdf, image)
-              path:
-                type: string
-                description: The path where the attachment is stored
-          description: A list of attachments to associate with the task (optional)
+            type: string
+          nullable: true
+        resources:
+          type: array
+          items:
+            type: string
+            format: binary
           nullable: true
     TaskResponse:
       type: object
       description: Task object including attachments
       properties:
-        attachments:
+        assignments:
           type: array
           items:
-            $ref: '#/components/schemas/Attachment'
+            $ref: '#/components/schemas/User'
+        patient:
+          $ref: '#/components/schemas/Patient'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResource'
       allOf:
         - $ref: '#/components/schemas/Task'
     TaskUpdateRequest:
@@ -199,78 +246,21 @@ components:
             - cancelled
           description: The updated status of the task
           nullable: true
-    UsersList:
-      type: array
-      description: List of users profile
-      items:
-        $ref: '#/components/schemas/UserProfile'
-    UserAccount:
+    DeleteResponse:
       type: object
-      description: Full User model schema
       properties:
+        message:
+          type: string
+          description: Delete message
         id:
           type: string
-        firstname:
-          type: string
-        lastname:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-        role:
-          type: string
-        doctorNumber:
-          type: number
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-    UserProfile:
+          description: Deleted resource id
+    ErrorResponse:
       type: object
-      description: Partial User model schema excluding password field for security
       properties:
-        id:
+        message:
           type: string
-        firstname:
+          description: Error message
+        details:
           type: string
-        lastname:
-          type: string
-        email:
-          type: string
-        role:
-          type: string
-        doctorNumber:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    UserRegisterRequest:
-      type: object
-      description: User registration request payload
-      properties:
-        firstname:
-          type: string
-        lastname:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-        role:
-          type: string
-    UserUpdateRequest:
-      type: object
-      description: User update request payload
-      properties:
-        firstname:
-          type: string
-        lastname:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
+          description: Detailed error message

@@ -1,9 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import {
   FormControl,
-  TextField,
   Button,
   Box,
   Typography,
@@ -20,32 +19,43 @@ import ArrowBackIosNewRounded from "@mui/icons-material/ArrowBackIosNewRounded"
 import Visibility from "@mui/icons-material/Visibility"
 import VisibilityOff from "@mui/icons-material/VisibilityOff"
 import AuthPaper from "../../components/AuthPaper"
-import { UserRoles } from "../../helpers/constants"
+import { IUserRole } from "../../helpers/types"
+import { fullName } from "../../helpers/miscellaneos"
+import { useRegisterMutation } from "../../redux/apis/authApi"
 
 interface IRegisterForm {
   firstname: string
   lastname: string
   email: string
+  role: IUserRole
   password: string
-  role: UserRoles | ""
   passwordConfirmation: string
 }
 
 const RegisterPage = () => {
   const {
-    register,
+    control,
+    getValues,
     handleSubmit,
     formState: { errors },
   } = useForm<IRegisterForm>({
     defaultValues: {
-      role: "",
+      role: "doctor",
     },
   })
   const navigate = useNavigate()
+  const [register, { isError }] = useRegisterMutation()
 
-  const onSubmit = (data: IRegisterForm) => {
-    console.log("Register successful with", data)
-    // Add your authentication logic here (e.g., call an API)
+  const onSubmit = async ({
+    firstname,
+    lastname,
+    email,
+    role,
+    password,
+  }: IRegisterForm) => {
+    const name = fullName(firstname, lastname)
+    await register({ name, email, role, password })
+    navigate("/")
   }
 
   const [showPassword, setShowPassword] = useState(false)
@@ -99,124 +109,178 @@ const RegisterPage = () => {
             </Typography>
           </Grid>
         </Grid>
-
-        <TextField
-          fullWidth
-          size="small"
-          label="First Name"
-          variant="outlined"
-          type="text"
-          {...register("firstname", {
-            required: "We need your First Name",
-          })}
-          error={!!errors.firstname}
-          helperText={errors.firstname?.message}
-          sx={{ mb: 2 }}
+        <Controller
+          control={control}
+          name="firstname"
+          rules={{
+            required: "We need your first name",
+          }}
+          render={({ field }) => (
+            <FormControl error={!!errors.firstname} size="small" sx={{ mb: 2 }}>
+              <InputLabel htmlFor="firstname">First Name</InputLabel>
+              <OutlinedInput
+                id="firstname"
+                label="First Name"
+                value={field.value}
+                onChange={field.onChange}
+                type="text"
+              />
+              {errors.firstname && (
+                <Typography variant="caption" color="error">
+                  {errors.firstname.message}
+                </Typography>
+              )}
+            </FormControl>
+          )}
         />
 
-        <TextField
-          fullWidth
-          size="small"
-          label="Last Name"
-          variant="outlined"
-          type="text"
-          {...register("lastname", {
-            required: "We need your Last Name",
-          })}
-          error={!!errors.lastname}
-          helperText={errors.lastname?.message}
-          sx={{ mb: 2 }}
+        <Controller
+          control={control}
+          name="lastname"
+          rules={{
+            required: "We need your last name",
+          }}
+          render={({ field }) => (
+            <FormControl error={!!errors.lastname} size="small" sx={{ mb: 2 }}>
+              <InputLabel htmlFor="lastname">Last Name</InputLabel>
+              <OutlinedInput
+                id="lastname"
+                label="Last Name"
+                value={field.value}
+                onChange={field.onChange}
+                type="text"
+              />
+              {errors.lastname && (
+                <Typography variant="caption" color="error">
+                  {errors.lastname.message}
+                </Typography>
+              )}
+            </FormControl>
+          )}
         />
 
-        <TextField
-          fullWidth
-          size="small"
-          label="Email"
-          variant="outlined"
-          type="email"
-          {...register("email", {
-            required: "We need your Email address",
+        <Controller
+          control={control}
+          name="email"
+          rules={{
+            required: true,
             pattern: {
               value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
               message: "Please enter a valid email address",
             },
-          })}
-          error={!!errors.email}
-          helperText={errors.email?.message}
-          sx={{ mb: 2 }}
+          }}
+          render={({ field }) => (
+            <FormControl error={!!errors.email} size="small" sx={{ mb: 2 }}>
+              <InputLabel htmlFor="email">Email</InputLabel>
+              <OutlinedInput
+                id="email"
+                label="Email"
+                value={field.value}
+                onChange={field.onChange}
+                type="text"
+              />
+              {errors.email && (
+                <Typography variant="caption" color="error">
+                  {errors.email.message}
+                </Typography>
+              )}
+            </FormControl>
+          )}
         />
 
-        <FormControl size="small" sx={{ mb: 2 }}>
-          <InputLabel htmlFor="role">Role</InputLabel>
-          <Select
-            id="role"
-            label="Role"
-            {...register("role", {
-              required: "Please select a role",
-            })}
-          >
-            <MenuItem value="SECRETARY">Secretary</MenuItem>
-            <MenuItem value="NURSE">Nurse</MenuItem>
-            <MenuItem value="DOCTOR">Doctor</MenuItem>
-          </Select>
-        </FormControl>
-
+        <Controller
+          control={control}
+          name="role"
+          render={({ field }) => (
+            <FormControl size="small" sx={{ mb: 2 }}>
+              <InputLabel htmlFor="role">Role</InputLabel>
+              <Select id="role" label="Role" {...field}>
+                <MenuItem value="secretary">Secretary</MenuItem>
+                <MenuItem value="nurse">Nurse</MenuItem>
+                <MenuItem value="doctor">Doctor</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        />
         <Divider sx={{ mb: 3, mt: 1 }} />
-
-        <FormControl size="small" sx={{ mb: 2 }}>
-          <InputLabel htmlFor="password">Password</InputLabel>
-          <OutlinedInput
-            id="password"
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            endAdornment={passwordAdornment(showPassword, () =>
-              setShowPassword((prev) => !prev)
-            )}
-          />
-        </FormControl>
-
-        <FormControl size="small" sx={{ mb: 2 }}>
-          <InputLabel htmlFor="passwordConfirm">
-            Password Confirmation
-          </InputLabel>
-          <OutlinedInput
-            id="passwordConfirm"
-            label="Pasword Confirmation"
-            type={showPasswordConfirmation ? "text" : "password"}
-            endAdornment={passwordAdornment(showPasswordConfirmation, () =>
-              setShowPasswordConfirmation((prev) => !prev)
-            )}
-          />
-        </FormControl>
-
-        {/* <TextField
-          fullWidth
-          size="small"
-          label="Password"
-          variant="outlined"
-          type="password"
-          {...register("password", { required: "Password is required" })}
-          error={!!errors.password}
-          helperText={errors.password?.message}
-          sx={{ mb: 2 }}
-        /> */}
-        {/* 
-        <TextField
-          fullWidth
-          size="small"
-          label="Password Confirmation"
-          variant="outlined"
-          type="password"
-          {...register("passwordConfirmation", {
-            required: "Password Confirmation is required",
-          })}
-          error={!!errors.passwordConfirmation}
-          helperText={errors.passwordConfirmation?.message}
-          sx={{ mb: 4 }}
-        /> */}
-
-        {/* Submit Button */}
-        <Button type="submit" variant="contained" color="primary">
+        <Controller
+          control={control}
+          name="password"
+          rules={{
+            required: "Password is required",
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters long",
+            },
+          }}
+          render={({ field }) => (
+            <FormControl size="small" sx={{ mb: 2 }} error={!!errors.password}>
+              <InputLabel htmlFor="password">Password</InputLabel>
+              <OutlinedInput
+                id="password"
+                label="Pasword"
+                value={field.value}
+                onChange={field.onChange}
+                type={showPassword ? "text" : "password"}
+                endAdornment={passwordAdornment(showPassword, () =>
+                  setShowPassword((prev) => !prev)
+                )}
+              />
+              {errors.password && (
+                <Typography variant="caption" color="error">
+                  {errors.password.message}
+                </Typography>
+              )}
+            </FormControl>
+          )}
+        />
+        <Controller
+          control={control}
+          name="passwordConfirmation"
+          rules={{
+            required: true,
+            validate: (value) =>
+              value === getValues("password") || "Passwords do not match!",
+          }}
+          render={({ field }) => (
+            <FormControl
+              size="small"
+              sx={{ mb: 1 }}
+              error={!!errors.passwordConfirmation}
+            >
+              <InputLabel htmlFor="passwordConfirm">
+                Password Confirmation
+              </InputLabel>
+              <OutlinedInput
+                id="passwordConfirm"
+                label="Pasword Confirmation"
+                value={field.value}
+                onChange={field.onChange}
+                type={showPasswordConfirmation ? "text" : "password"}
+                endAdornment={passwordAdornment(showPasswordConfirmation, () =>
+                  setShowPasswordConfirmation((prev) => !prev)
+                )}
+              />
+              {errors.passwordConfirmation && (
+                <Typography variant="caption" color="error">
+                  {errors.passwordConfirmation.message}
+                </Typography>
+              )}
+            </FormControl>
+          )}
+        />
+        <Divider sx={{ mb: 3, mt: 2 }} />
+        {isError && (
+          <Typography variant="caption" color="error">
+            Registration failed. Please try again.
+          </Typography>
+        )}
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          // disabled={!isValid}
+        >
           Create account
         </Button>
       </Box>

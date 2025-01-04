@@ -5,7 +5,9 @@ properties:
     type: string
   name:
     type: string
-  email:
+  phone:
+    type: string
+  address:
     type: string
   createdAt:
     type: string

@@ -1,9 +1,15 @@
 type: object
 description: Task object including attachments
 properties:
-  attachments:
+  assignments:
     type: array
     items:
-      $ref: "../attachment.schemas/Attachment.yaml"
+      $ref: "../users.schemas/User.yaml"
+  patient:
+    $ref: "../patient.schemas/Patient.yaml"
+  resources:
+    type: array
+    items:
+      $ref: "../taskResource.schemas/TaskResource.yaml"
 allOf:
   - $ref: "./Task.yaml"

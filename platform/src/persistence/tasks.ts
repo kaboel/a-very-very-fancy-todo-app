@@ -1,77 +1,89 @@
-import { PrismaClient, Task, TaskStatus } from "@prisma/client"
-import { ITaskGetMany, ITaskCreate, ITaskUpdate } from "./__dto__/tasks.dto"
+import { PrismaClient, Task, TaskAssignment } from "@prisma/client"
+import { ITaskGetMany, ITaskCreate, ITaskUpdate } from "./__dtos__/tasks.dto"
+
+const prisma = new PrismaClient()
 
 export class TaskPersistence {
-  private db: any
-
-  constructor() {
-    const prisma = new PrismaClient()
-
-    this.db = prisma.task
-  }
-
   async createTask(data: ITaskCreate): Promise<Task> {
     const {
       title,
       description,
       deadline,
-      patientId,
-      attachmentIds,
       creatorId,
+      patientId,
+      assigneeIds,
+      resources,
     } = data
-
-    const newTask = await this.db.create({
+    const assingments = assigneeIds?.map((id) => ({ userId: id }))
+    const newTask = await prisma.task.create({
       data: {
         title,
         description,
-        creatorId,
         deadline,
-        patientId,
-        status: TaskStatus.NEW,
-        ...(attachmentIds?.length && {
-          attachments: {
-            connect: attachmentIds?.map((id) => ({ id })),
-          },
-        }),
+        creator: {
+          connect: { id: creatorId },
+        },
+        patient: {
+          connect: { id: patientId },
+        },
+        assignments: {
+          create: assingments,
+        },
+        resources: {
+          create: resources,
+        },
       },
     })
-
     return newTask
   }
 
   async getTask(id: string): Promise<Task | Error> {
-    const task = await this.db.findUnique({ where: { id } })
+    const task = await prisma.task.findUnique({ where: { id } })
     if (!task) {
       throw new Error(`Task with id ${id} not found`)
     }
     return task
   }
-
   async getTasks({
     search,
-    status,
     creatorId,
     patientId,
-  }: ITaskGetMany): Promise<Task[] | []> {
-    const searchText = search
-    const tasks = await this.db.findMany({
-      where: {
-        ...(searchText && {
-          title: {
-            searchText,
-            mode: "insensitive",
-          },
-          description: {
-            searchText,
-            mode: "insensitive",
-          },
-        }),
-        ...(status && { status }),
-        ...(patientId && { patientId }),
-        ...(creatorId && { creatorId }),
-      },
-    })
-    return tasks
+    assignedToMe,
+  }: ITaskGetMany): Promise<Task[] | void> {
+    try {
+      // const searchText = search
+      const tasks = await prisma.task.findMany({
+        where: {
+          ...(search && {
+            search,
+            mode: "insesitive",
+          }),
+          OR: [
+            {
+              ...(creatorId && { creatorId }),
+            },
+            {
+              ...(patientId && { patientId }),
+            },
+            {
+              ...(assignedToMe === "true" && {
+                assignments: {
+                  some: {
+                    userId: creatorId,
+                  },
+                },
+              }),
+            },
+          ],
+        },
+        include: {
+          assignments: true,
+        },
+      })
+      return tasks
+    } catch (error: any) {
+      console.error(error)
+    }
   }
 
   async updateTask(data: ITaskUpdate): Promise<Task | Error> {
@@ -79,7 +91,7 @@ export class TaskPersistence {
       data
 
     try {
-      const updatedTask = await this.db.update({
+      const updatedTask = await prisma.task.update({
         where: { id },
         data: {
           ...(title && { title }),
@@ -100,7 +112,7 @@ export class TaskPersistence {
         },
         include: {
           patient: true,
-          attachments: true,
+          resources: true,
         },
       })
 
@@ -112,9 +124,9 @@ export class TaskPersistence {
 
   async deleteTask(id: string): Promise<{ id: string }> {
     try {
-      const deletedTask = await this.db.delete({
+      const deletedTask = await prisma.task.delete({
         where: { id },
-        select: { id },
+        select: { id: true },
       })
 
       if (!deletedTask) {

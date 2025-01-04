@@ -7,12 +7,12 @@ info:
   description: Duh?
   version: "1.0.0"
 tags:
-  - name: Base
-    description: Base level endpoints `/`
   - name: Users
     description: User model related endpoints `/users`
   - name: Tasks
     description: Task model related endpoints `/tasks`
+  - name: Patients
+    description: Patient model related endpoints `/patients`
 paths: {}
 components:
   securitySchemes:
@@ -26,12 +26,20 @@ components:
     SearchText:
       $ref: "./parameters/SearchText.yaml"
   schemas:
-    DeleteResponse:
-      $ref: "./schemas/DeleteResponse.yaml"
-    ErrorResponse:
-      $ref: "./schemas/ErrorResponse.yaml"
-    Attachment:
-      $ref: "./schemas/attachment.schemas/Attachment.yaml"
+    User:
+      $ref: "./schemas/users.schemas/User.yaml"
+    UsersList:
+      $ref: "./schemas/users.schemas/UsersList.yaml"
+    UserLoginRequest:
+      $ref: "./schemas/users.schemas/UserLoginRequest.yaml"
+    UserRegisterRequest:
+      $ref: "./schemas/users.schemas/UserRegisterRequest.yaml"
+    UserUpdateRequest:
+      $ref: "./schemas/users.schemas/UserUpdateRequest.yaml"
+    TaskResource:
+      $ref: "./schemas/taskResource.schemas/TaskResource.yaml"
+    ResourceType:
+      $ref: "./schemas/taskResource.schemas/ResourceType.yaml"
     Patient:
       $ref: "./schemas/patient.schemas/Patient.yaml"
     Task:
@@ -42,13 +50,7 @@ components:
       $ref: "./schemas/task.schemas/TaskResponse.yaml"
     TaskUpdateRequest:
       $ref: "./schemas/task.schemas/TaskUpdateRequest.yaml"
-    UsersList:
-      $ref: "./schemas/users.schemas/UsersList.yaml"
-    UserAccount:
-      $ref: "./schemas/users.schemas/UserAccount.yaml"
-    UserProfile:
-      $ref: "./schemas/users.schemas/UserProfile.yaml"
-    UserRegisterRequest:
-      $ref: "./schemas/users.schemas/UserRegisterRequest.yaml"
-    UserUpdateRequest:
-      $ref: "./schemas/users.schemas/UserUpdateRequest.yaml"
+    DeleteResponse:
+      $ref: "./schemas/DeleteResponse.yaml"
+    ErrorResponse:
+      $ref: "./schemas/ErrorResponse.yaml"

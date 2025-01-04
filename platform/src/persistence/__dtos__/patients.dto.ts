@@ -1,6 +1,11 @@
+export type IPatientGetMany = {
+  searchText: string
+}
+
 export type IPatientCreate = {
-  firstname: string
-  lastname: string
+  name: string
+  phone: string
+  address: string
 }
 
 export type IPatientUpdate = {

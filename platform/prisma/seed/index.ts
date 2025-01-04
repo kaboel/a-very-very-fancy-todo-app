@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import seedUser from "./seeders/userSeeder"
 import seedPatient from "./seeders/patientSeeder"
-import seedResourceType from "./seeders/resourceTypeSeeder"
 import seedTask from "./seeders/taskSeeder"
 import seedPatientOnDoctor from "./seeders/patientOnDoctorSeeder"
 import seedTaskAssignment from "./seeders/taskAssignmentSeeder"
@@ -9,7 +8,7 @@ import seedTaskAssignment from "./seeders/taskAssignmentSeeder"
 async function clearTables() {
   try {
     const prisma = new PrismaClient()
-    await prisma.$executeRaw`TRUNCATE TABLE "User", "Patient", "Task", "PatientOnDoctor", "TaskAssignment", "TaskResource", "ResourceType" RESTART IDENTITY CASCADE;`
+    await prisma.$executeRaw`TRUNCATE TABLE "User", "Patient", "Task", "PatientOnDoctor", "TaskAssignment", "TaskResource" RESTART IDENTITY CASCADE;`
     console.log("Database cleared!\n")
   } catch (error: any) {
     console.error(`Error clearing db tables!`, error)
@@ -23,7 +22,6 @@ async function initSeed() {
     const userIds = await seedUser()
     const patientIds = await seedPatient()
 
-    await seedResourceType()
     await seedTask(userIds, patientIds)
     await seedPatientOnDoctor(patientIds)
     await seedTaskAssignment(userIds)

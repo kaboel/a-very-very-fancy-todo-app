@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router"
+import { useNavigate, Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import {
   TextField,
@@ -6,8 +6,12 @@ import {
   Box,
   Typography,
   Grid2 as Grid,
+  Alert,
+  CircularProgress,
 } from "@mui/material"
 import AuthPaper from "../../components/AuthPaper"
+import { useState } from "react"
+import { useLoginMutation } from "../../redux/apis/authApi"
 
 interface ILoginForm {
   email: string
@@ -16,6 +20,8 @@ interface ILoginForm {
 
 const Login = () => {
   const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
+  const [login, { isLoading, isError }] = useLoginMutation()
 
   const {
     register,
@@ -23,9 +29,17 @@ const Login = () => {
     formState: { errors },
   } = useForm<ILoginForm>()
 
-  const onSubmit = (data: ILoginForm) => {
-    console.log("Login successful with", data)
-    // Add your authentication logic here (e.g., call an API)
+  const onSubmit = async (data: ILoginForm) => {
+    try {
+      await login(data)
+      if (isError) {
+        setError("Invalid email or password.")
+        return
+      }
+      navigate("/")
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
@@ -39,11 +53,16 @@ const Login = () => {
           Login
         </Typography>
 
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         <TextField
           fullWidth
           label="Email"
           variant="outlined"
-          type="email"
           {...register("email", {
             required: "Email is required",
             pattern: {
@@ -67,19 +86,28 @@ const Login = () => {
           sx={{ mb: 2 }}
         />
 
-        {/* Submit Button */}
-        <Button type="submit" fullWidth variant="contained" color="primary">
-          Login
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          color="primary"
+          disabled={isLoading}
+          sx={{ position: "relative" }}
+        >
+          {isLoading ? (
+            <CircularProgress size={24} sx={{ color: "white" }} />
+          ) : (
+            "Login"
+          )}
         </Button>
 
-        {/* Additional links */}
         <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
           <Grid>
             <Typography variant="body2" color="textSecondary">
               Don't have an account?{" "}
-              <a href="#" onClick={() => navigate("/auth/register")}>
+              <Link to="/auth/register" style={{ textDecoration: "none" }}>
                 Sign up here
-              </a>
+              </Link>
             </Typography>
           </Grid>
         </Grid>

@@ -1,0 +1,19 @@
+type: object
+properties:
+  id:
+    type: string
+  originalName:
+    type: string
+  filename:
+    type: string
+  mimetype:
+    type: string
+  size:
+    type: number
+  path:
+    type: string
+  resourceTypeId:
+    type: string
+  createdAt:
+    type: string
+    format: date-time

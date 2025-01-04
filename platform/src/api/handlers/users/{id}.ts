@@ -31,7 +31,7 @@ get.apiDoc = {
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/UserProfile",
+            $ref: "#/components/schemas/User",
           },
         },
       },

@@ -1,20 +1,20 @@
 import { Request, Response } from "express"
-import { AttachmentPersistence } from "../../../persistence/attachments"
+import { ResourcePersistence } from "../../../persistence/resources"
 
-const { getAttachment } = new AttachmentPersistence()
+const { getResource } = new ResourcePersistence()
 
 export async function get(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const attachment = await getAttachment(id)
+    const attachment = await getResource(id)
     return attachment
   } catch (error: any) {
     res.status(500).json({ error })
   }
 }
 get.apiDoc = {
-  tags: ["Attachments"],
-  summary: "Get Attachment",
+  tags: ["Resources"],
+  summary: "Get Resources",
   description: "Get single attachment by id",
   parameters: [
     {
@@ -27,7 +27,7 @@ get.apiDoc = {
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/Attachment",
+            $ref: "#/components/schemas/TaskResource",
           },
         },
       },

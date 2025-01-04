@@ -1,30 +1,31 @@
-import { UserRole } from "@prisma/client"
 import { Request, Response } from "express"
 import AuthHelper from "../../helpers/authHelper"
 import { generateDoctorNumber } from "../../helpers/constHelper"
-import { IUserRegister } from "../../persistence/__dto__/users.dto"
+import { IUserRegister } from "../../persistence/__dtos__/users.dto"
 import { UserPersistence } from "../../persistence/users"
+import { USER_ROLES } from "../../helpers/contants"
 
 const { createUser } = new UserPersistence()
 
 export async function post(req: Request, res: Response) {
   try {
-    const { firstname, lastname, email, role, password } = req.body
+    const { name, email, password, role } = req.body
     const auth = new AuthHelper()
     const passwordHash = await auth.encryptPassword(password)
     const userData: IUserRegister = {
-      firstname,
-      lastname,
+      name,
       email,
       role,
       password: passwordHash,
       doctorNumber: null,
     }
-    if (role === UserRole.DOCTOR) {
+    if (role === USER_ROLES.DOCTOR) {
       userData.doctorNumber = generateDoctorNumber()
     }
-    const newUser = await createUser(userData)
-    res.status(200).json(newUser)
+    const user = await createUser(userData)
+    const token = auth.generateToken(user)
+
+    res.status(200).json({ token, user })
   } catch (error: any) {
     res.status(500).json({ message: error.toString() })
   }
@@ -45,11 +46,20 @@ post.apiDoc = {
   },
   responses: {
     "200": {
-      description: "Succesful request",
+      description: "Successful request",
       content: {
         "application/json": {
           schema: {
-            description: "Success",
+            type: "object",
+            properties: {
+              user: {
+                $ref: "#/components/schemas/User",
+              },
+              token: {
+                type: "string",
+                description: "A new token issued after register",
+              },
+            },
           },
         },
       },

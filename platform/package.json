@@ -19,6 +19,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
     "express-openapi": "^12.1.3",

@@ -1,16 +1,19 @@
-export function stringToColor(string: string) {
-  let hash = 0
-  let i
+export function stringToColor(str: string) {
+  if (!str) return "#000000" // Default color for empty input
 
-  for (i = 0; i < string.length; i += 1) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash)
+  let hash = 0
+
+  // Generate hash value
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
   }
 
   let color = "#"
 
-  for (i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 0xff
-    color += `00${value.toString(16)}`.slice(-2)
+  // Convert hash to RGB
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff // Extract 8 bits
+    color += value.toString(16).padStart(2, "0") // Convert to 2-digit hex
   }
 
   return color
@@ -20,4 +23,20 @@ export function formatRole(role: string) {
   const formattedRole =
     role.charAt(0).toLocaleUpperCase() + role.slice(1).toLocaleLowerCase()
   return formattedRole
+}
+
+export function initials(name: string) {
+  return name
+    .split(" ")
+    .map((word) => word[0].toUpperCase())
+    .join("")
+}
+
+export function fullName(
+  firstname: string | undefined,
+  lastname: string | undefined
+): string {
+  const trimmedFirst = firstname?.trim() || ""
+  const trimmedLast = lastname?.trim() || ""
+  return [trimmedFirst, trimmedLast].filter(Boolean).join(" ")
 }

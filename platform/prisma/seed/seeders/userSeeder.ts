@@ -21,7 +21,7 @@ async function seedUser() {
         ]
       const user: UserInput = {
         name: faker.person.fullName(),
-        email: faker.internet.email(),
+        email: faker.internet.email().toLowerCase(),
         password: bcrypt.hashSync("userpassword123", 12),
         role,
       }
