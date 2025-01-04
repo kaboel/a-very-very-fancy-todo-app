@@ -41,8 +41,8 @@ model PatientOnDoctor {
   doctorId  String
   patientId String
   // Relationships
-  doctor    User      @relation(fields: [doctorId], references: [id])
-  patient   Patient   @relation(fields: [patientId], references: [id])
+  doctor    User      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patient   Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   @@unique([doctorId, patientId])
 }
@@ -59,7 +59,7 @@ model Task {
   updatedAt   DateTime?        @updatedAt
   // Relationships
   creator     User             @relation(fields: [creatorId], references: [id])
-  patient     Patient?         @relation(fields: [patientId], references: [id])
+  patient     Patient?         @relation(fields: [patientId], references: [id], onDelete: SetNull)
   assignments TaskAssignment[]
   resources   TaskResource[]
 }
@@ -70,8 +70,8 @@ model TaskAssignment {
   userId    String
   createdAt DateTime? @default(now())
   // Relationships
-  task      Task      @relation(fields: [taskId], references: [id])
-  assignee  User      @relation(fields: [userId], references: [id])
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  assignee  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, userId])
 }
@@ -86,5 +86,5 @@ model TaskResource {
   taskId       String
   createdAt    DateTime? @default(now())
   // Relationships
-  task         Task      @relation(fields: [taskId], references: [id])
+  task         Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }

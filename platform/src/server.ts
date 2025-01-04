@@ -1,11 +1,11 @@
 import fs from "fs"
 import path from "path"
-import express from "express"
+import express, { NextFunction, Request, Response } from "express"
 import { initialize } from "express-openapi"
+import morgan from "morgan"
 import dotenv from "dotenv"
 import cors from "cors"
 import * as swaggerUi from "swagger-ui-express"
-import errorMiddleware from "./middlewares/errorMiddleware"
 import uploadMiddleware from "./middlewares/uploadMiddleware"
 
 dotenv.config()
@@ -17,12 +17,26 @@ export async function init() {
 
   app.use(
     cors({
-      origin: "http://localhost:8000",
+      origin: process.env.CLIENT_ORIGIN,
       methods: "GET,PUT,PATCH,POST,DELETE",
       credentials: true,
       optionsSuccessStatus: 204,
     })
   )
+  app.use(
+    morgan((tokens, req, res) =>
+      [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, "content-length"),
+        "-",
+        tokens["response-time"](req, res),
+        "ms",
+      ].join(" ")
+    )
+  )
+  app.use("/uploads", express.static(path.join(__dirname, "../uploads")))
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
 
@@ -36,7 +50,6 @@ export async function init() {
     consumesMiddleware: {
       "multipart/form-data": uploadMiddleware,
     },
-    errorMiddleware,
     routesGlob: "**/*.{js,ts}",
     routesIndexFileRegExp: /(?:index)?\.[tj]s$/,
   })

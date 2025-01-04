@@ -14,7 +14,7 @@ async function seedTask(userIds: string[], ptntIds: string[]) {
 
       return {
         title: faker.lorem.words(3),
-        description: faker.lorem.paragraph(1),
+        description: faker.lorem.paragraphs(4),
         deadline,
         creatorId,
         patientId,

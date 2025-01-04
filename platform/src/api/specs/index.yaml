@@ -42,6 +42,8 @@ components:
       $ref: "./schemas/taskResource.schemas/ResourceType.yaml"
     Patient:
       $ref: "./schemas/patient.schemas/Patient.yaml"
+    PatientCreateRequest:
+      $ref: "./schemas/patient.schemas/PatientCreateRequest.yaml"
     Task:
       $ref: "./schemas/task.schemas/Task.yaml"
     TaskCreateRequest:

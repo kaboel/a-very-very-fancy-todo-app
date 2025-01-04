@@ -4,9 +4,17 @@ import { IPatientCreate, IPatientUpdate } from "./__dtos__/patients.dto"
 const prisma = new PrismaClient()
 
 export class PatientPersistence {
-  async createPatient(data: Partial<Patient>): Promise<Patient> {
+  async createPatient(data: IPatientCreate): Promise<Patient> {
+    const onDoctors = data.doctorIds?.map((id) => ({ doctorId: id }))
     const newPatient = await prisma.patient.create({
-      data,
+      data: {
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+        doctors: {
+          create: onDoctors,
+        },
+      },
     })
     return newPatient
   }

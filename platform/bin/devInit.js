@@ -72,9 +72,10 @@ const generateEnv = async () => {
   const jwtSecret = crypto.randomBytes(64).toString("hex");
 
   const envContent = `
-DATABASE_URL=${dbUrl}
+SERVER_PORT=3000
 JWT_SECRET=${jwtSecret}
-NODE_ENV=dev
+DATABASE_URL=${dbUrl}
+CLIENT_ORIGIN=http://localhost:8000
   `;
   fs.writeFileSync(envPath, envContent.trim(), "utf-8");
   console.log(".env file generated!");
@@ -82,7 +83,7 @@ NODE_ENV=dev
 
 const migrateDatabase = async () => {
   try {
-    console.log("Migrating database...");
+    console.log("Preparing database...");
     const result = await runCommand("npx prisma migrate dev --name init");
     console.log(result);
   } catch (error) {

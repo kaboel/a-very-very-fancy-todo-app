@@ -26,8 +26,9 @@ export type ITaskUpdate = {
   description?: string
   deadline?: Date
   patientId?: string
-  status?: ITaskStatus
-  attachments?: string[]
+  completed?: boolean
+  assigneeIds?: string[]
+  resources?: TaskResource[]
 }
 
 export type ITaskResponse = Task & {

@@ -8,6 +8,7 @@ import type {
   ITaskGetMany,
 } from "../../../persistence/__dtos__/tasks.dto"
 import type { TaskResource } from "@prisma/client"
+import { compareAsc, isValid } from "date-fns"
 
 const { bulkCreateResources } = new ResourcePersistence()
 const { createTask, getTasks, updateTask } = new TaskPersistence()
@@ -17,16 +18,30 @@ export const get: any = [
   async function get(req: Request, res: Response) {
     try {
       const data: ITaskGetMany = req.query
-
       const tasks = await getTasks(data)
       if (!tasks) {
-        res.status(404).json({ message: "Task not found!" })
+        return res.status(404).json({ message: "Tasks not found!" })
       }
-      res.status(200).json(tasks)
+      const sortedTasks = tasks.sort((a, b) => {
+        if (a.completed !== b.completed) {
+          return a.completed ? 1 : -1
+        }
+        if (a.deadline && b.deadline) {
+          const dateA = new Date(a.deadline)
+          const dateB = new Date(b.deadline)
+          if (isValid(dateA) && isValid(dateB)) {
+            return compareAsc(dateA, dateB)
+          }
+        }
+        if (!a.deadline) return 1
+        if (!b.deadline) return -1
+        return 0
+      })
+
+      res.status(200).json(sortedTasks)
     } catch (error: any) {
       res.status(500).json({ message: error.toString() })
     }
-    return
   },
 ]
 get.apiDoc = {
@@ -156,69 +171,69 @@ post.apiDoc = {
   },
 }
 
-export async function put(req: Request, res: Response) {
-  try {
-    const { id, title, description, deadline, patientId, attachments, status } =
-      req.body
-    const updatedTask = await updateTask({
-      id,
-      title,
-      description,
-      deadline,
-      status,
-      patientId,
-      attachments,
-    })
-    res.status(200).json(updatedTask)
-  } catch (error: any) {
-    res.status(500).json(error.toString())
-  }
-}
-put.apiDoc = {
-  tags: ["Tasks"],
-  summary: "Update Task",
-  description: "Update the details of an existing task",
-  parameters: [
-    {
-      name: "id",
-      in: "path",
-      required: true,
-      description: "The ID of the task to update",
-      schema: {
-        type: "string",
-      },
-    },
-  ],
-  requestBody: {
-    required: true,
-    content: {
-      "application/json": {
-        schema: {
-          $ref: "#/components/schemas/TaskUpdateRequest",
-        },
-      },
-    },
-  },
-  responses: {
-    "200": {
-      description: "Task successfully updated",
-      content: {
-        "application/json": {
-          schema: {
-            $ref: "#/components/schemas/TaskResponse",
-          },
-        },
-      },
-    },
-    "4XX": {
-      description: "Bad request, invalid data provided",
-      content: {
-        "application/json": {
-          schema: {
-            $ref: "#/components/schemas/ErrorResponse",
-          },
-        },
-      },
-    },
-  },
-}
+// export async function put(req: Request, res: Response) {
+//   try {
+//     const { id, title, description, deadline, patientId, attachments, status } =
+//       req.body
+//     const updatedTask = await updateTask({
+//       id,
+//       title,
+//       description,
+//       deadline,
+//       status,
+//       patientId,
+//       attachments,
+//     })
+//     res.status(200).json(updatedTask)
+//   } catch (error: any) {
+//     res.status(500).json(error.toString())
+//   }
+// }
+// put.apiDoc = {
+//   tags: ["Tasks"],
+//   summary: "Update Task",
+//   description: "Update the details of an existing task",
+//   parameters: [
+//     {
+//       name: "id",
+//       in: "path",
+//       required: true,
+//       description: "The ID of the task to update",
+//       schema: {
+//         type: "string",
+//       },
+//     },
+//   ],
+//   requestBody: {
+//     required: true,
+//     content: {
+//       "application/json": {
+//         schema: {
+//           $ref: "#/components/schemas/TaskUpdateRequest",
+//         },
+//       },
+//     },
+//   },
+//   responses: {
+//     "200": {
+//       description: "Task successfully updated",
+//       content: {
+//         "application/json": {
+//           schema: {
+//             $ref: "#/components/schemas/TaskResponse",
+//           },
+//         },
+//       },
+//     },
+//     "4XX": {
+//       description: "Bad request, invalid data provided",
+//       content: {
+//         "application/json": {
+//           schema: {
+//             $ref: "#/components/schemas/ErrorResponse",
+//           },
+//         },
+//       },
+//     },
+//   },
+// }

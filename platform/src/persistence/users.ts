@@ -7,7 +7,7 @@ export class UserPersistence {
   async createUser(data: IUserRegister): Promise<User> {
     const { email, password, name, role, doctorNumber } = data
     try {
-      const newUser = await prisma.user.create({
+      return await prisma.user.create({
         data: {
           email,
           password,
@@ -16,7 +16,6 @@ export class UserPersistence {
           doctorNumber,
         },
       })
-      return newUser
     } catch (error: any) {
       console.error(error)
       throw new Error(error.toString())
@@ -28,7 +27,6 @@ export class UserPersistence {
       const user = await prisma.user.findUnique({
         where: { id },
       })
-
       if (!user) {
         throw new Error(`User with id ${id} not found`)
       }
@@ -72,19 +70,17 @@ export class UserPersistence {
     return users
   }
 
-  async updateUser(data: IUserUpdate): Promise<IUserProfile> {
+  async updateUser(data: IUserUpdate): Promise<User> {
     try {
-      const { id, email, password, name } = data
-
-      const updatedUser = await prisma.user.update({
+      const { id, name, email, password } = data
+      return await prisma.user.update({
         where: { id },
         data: {
+          ...(name && { name }),
           ...(email && { email }),
           ...(password && { password }),
-          ...(name && { name }),
         },
       })
-      return updatedUser
     } catch (error: any) {
       throw new Error(error.toString())
     }

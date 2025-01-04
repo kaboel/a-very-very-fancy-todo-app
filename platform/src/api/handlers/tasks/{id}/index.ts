@@ -1,7 +1,8 @@
 import { Request, Response } from "express"
-import { TaskPersistence } from "../../../persistence/tasks"
+import { TaskPersistence } from "../../../../persistence/tasks"
+import authMiddleware from "../../../../middlewares/authMiddleware"
 
-const { getTask, deleteTask } = new TaskPersistence()
+const { getTask, deleteTask, updateTask } = new TaskPersistence()
 
 export async function get(req: Request, res: Response) {
   try {
@@ -53,12 +54,10 @@ get.apiDoc = {
 export async function del(req: Request, res: Response) {
   try {
     const { id: taskId } = req.params
-
     const deleted = await deleteTask(taskId)
     if (!deleted) {
       res.status(403).json({ message: `Unauthorized` })
     }
-
     res.status(200).json({
       message: "Task deleted!",
       id: deleted.id,
@@ -89,6 +88,65 @@ del.apiDoc = {
     },
     "4XX": {
       description: "Request errors",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ErrorResponse",
+          },
+        },
+      },
+    },
+  },
+}
+
+export const put: any = [
+  authMiddleware,
+  async function put(req: Request, res: Response) {
+    try {
+      const taskId = req.params.id
+
+      const updated = await updateTask(taskId, req.body)
+      if (!updated) {
+        res.status(403).json({ message: "Forbidden" })
+      }
+      res.status(200).json(updated)
+    } catch (error: any) {
+      res.status(500).json({ message: error.toString() })
+    }
+  },
+]
+put.apiDoc = {
+  tags: ["Tasks"],
+  summary: "Update Task",
+  description: "Update a single task by id",
+  parameters: [
+    {
+      $ref: "#/components/parameters/ResourceId",
+    },
+  ],
+  requestBody: {
+    required: true,
+    content: {
+      "multipart/form-data": {
+        schema: {
+          $ref: "#/components/schemas/TaskUpdateRequest",
+        },
+      },
+    },
+  },
+  responses: {
+    "200": {
+      description: "Update request successful",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/Task",
+          },
+        },
+      },
+    },
+    "4XX": {
+      description: "Request error.",
       content: {
         "application/json": {
           schema: {

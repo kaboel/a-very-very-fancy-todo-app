@@ -86,13 +86,9 @@ components:
       type: object
       description: User update request payload
       properties:
-        firstname:
-          type: string
-        lastname:
+        name:
           type: string
         email:
-          type: string
-        password:
           type: string
     TaskResource:
       type: object
@@ -142,6 +138,19 @@ components:
         updatedAt:
           type: string
           format: date-time
+    PatientCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        doctorIds:
+          type: array
+          items:
+            type: string
     Task:
       type: object
       properties:
@@ -213,38 +222,28 @@ components:
       properties:
         id:
           type: string
-          description: The ID of the task (should match the {id} parameter)
         title:
           type: string
-          description: The updated title of the task
-          nullable: true
         description:
           type: string
-          description: The updated description of the task
-          nullable: true
         deadline:
           type: string
           format: date-time
-          description: The updated deadline of the task
-          nullable: true
+        creatorId:
+          type: string
         patientId:
           type: string
-          description: The updated patient ID related to the task
           nullable: true
-        attachmentIds:
+        assigneeIds:
           type: array
           items:
             type: string
-          description: List of attachments related to the task
           nullable: true
-        status:
-          type: string
-          enum:
-            - pending
-            - in-progress
-            - completed
-            - cancelled
-          description: The updated status of the task
+        resources:
+          type: array
+          items:
+            type: string
+            format: binary
           nullable: true
     DeleteResponse:
       type: object

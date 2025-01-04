@@ -78,6 +78,8 @@ export class TaskPersistence {
         },
         include: {
           assignments: true,
+          resources: true,
+          patient: true,
         },
       })
       return tasks
@@ -86,36 +88,52 @@ export class TaskPersistence {
     }
   }
 
-  async updateTask(data: ITaskUpdate): Promise<Task | Error> {
-    const { id, title, description, deadline, patientId, status, attachments } =
-      data
-
+  async updateTask(
+    taskId: string,
+    data: Partial<ITaskUpdate>
+  ): Promise<Task | Error> {
+    const {
+      title,
+      description,
+      deadline,
+      patientId,
+      completed,
+      assigneeIds,
+      resources,
+    } = data
     try {
+      const assignments = assigneeIds?.map((userId) => ({
+        taskId_userId: { taskId, userId },
+      }))
       const updatedTask = await prisma.task.update({
-        where: { id },
+        where: { id: taskId },
         data: {
           ...(title && { title }),
           ...(description && { description }),
           ...(deadline && { deadline }),
-          ...(status && { status }),
-          ...(patientId !== undefined && {
-            patient: patientId
-              ? { connect: { id: patientId } }
-              : { disconnect: true },
+          ...(completed && { completed }),
+          ...(assignments?.length && {
+            assignments: { set: assignments },
           }),
-          ...(attachments && {
-            attachments: {
-              set: [], // reset attachements for the current entry
-              connect: attachments.map((attId) => ({ id: attId })),
+          ...(patientId && {
+            patient: {
+              connect: {
+                id: patientId,
+              },
+            },
+          }),
+          ...(resources?.length && {
+            resources: {
+              set: resources,
             },
           }),
         },
         include: {
-          patient: true,
+          assignments: true,
           resources: true,
+          patient: true,
         },
       })
-
       return updatedTask
     } catch (error: any) {
       throw new Error(error.toString())
@@ -126,13 +144,7 @@ export class TaskPersistence {
     try {
       const deletedTask = await prisma.task.delete({
         where: { id },
-        select: { id: true },
       })
-
-      if (!deletedTask) {
-        throw new Error(`Task with id ${id} cannot be deleted`)
-      }
-
       return deletedTask
     } catch (error: any) {
       throw new Error(error.toString())
