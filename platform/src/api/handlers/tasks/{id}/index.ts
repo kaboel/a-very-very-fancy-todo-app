@@ -51,21 +51,24 @@ get.apiDoc = {
   },
 }
 
-export async function del(req: Request, res: Response) {
-  try {
-    const { id: taskId } = req.params
-    const deleted = await deleteTask(taskId)
-    if (!deleted) {
-      res.status(403).json({ message: `Unauthorized` })
+export const del: any = [
+  authMiddleware,
+  async function del(req: Request, res: Response) {
+    try {
+      const { id: taskId } = req.params
+      const deleted = await deleteTask(taskId)
+      if (!deleted) {
+        res.status(403).json({ message: `Unauthorized` })
+      }
+      res.status(200).json({
+        message: "Task deleted!",
+        id: deleted.id,
+      })
+    } catch (error: any) {
+      res.status(500).json(error.toString())
     }
-    res.status(200).json({
-      message: "Task deleted!",
-      id: deleted.id,
-    })
-  } catch (error: any) {
-    res.status(500).json(error.toString())
-  }
-}
+  },
+]
 del.apiDoc = {
   tags: ["Tasks"],
   summary: "Delete Task",

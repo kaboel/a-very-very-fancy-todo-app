@@ -23,15 +23,21 @@ export class TaskPersistence {
         creator: {
           connect: { id: creatorId },
         },
-        patient: {
-          connect: { id: patientId },
-        },
-        assignments: {
-          create: assingments,
-        },
-        resources: {
-          create: resources,
-        },
+        ...(patientId && {
+          patient: {
+            connect: { id: patientId },
+          },
+        }),
+        ...(assigneeIds?.length && {
+          assignments: {
+            create: assingments,
+          },
+        }),
+        ...(resources?.length && {
+          resources: {
+            create: resources,
+          },
+        }),
       },
     })
     return newTask
@@ -102,9 +108,6 @@ export class TaskPersistence {
       resources,
     } = data
     try {
-      const assignments = assigneeIds?.map((userId) => ({
-        taskId_userId: { taskId, userId },
-      }))
       const updatedTask = await prisma.task.update({
         where: { id: taskId },
         data: {
@@ -112,9 +115,6 @@ export class TaskPersistence {
           ...(description && { description }),
           ...(deadline && { deadline }),
           ...(completed && { completed }),
-          ...(assignments?.length && {
-            assignments: { set: assignments },
-          }),
           ...(patientId && {
             patient: {
               connect: {
@@ -122,9 +122,15 @@ export class TaskPersistence {
               },
             },
           }),
+          ...(assigneeIds?.length && {
+            assignments: {
+              deleteMany: {},
+              create: assigneeIds?.map((userId) => ({ userId })),
+            },
+          }),
           ...(resources?.length && {
             resources: {
-              set: resources,
+              set: resources.map((resource) => ({ id: resource.id })),
             },
           }),
         },
@@ -144,6 +150,7 @@ export class TaskPersistence {
     try {
       const deletedTask = await prisma.task.delete({
         where: { id },
+        select: { id: true },
       })
       return deletedTask
     } catch (error: any) {

@@ -3,15 +3,10 @@ import { ResourcePersistence } from "../../../persistence/resources"
 import { TaskPersistence } from "../../../persistence/tasks"
 import authMiddleware from "../../../middlewares/authMiddleware"
 
-import type {
-  ITaskCreate,
-  ITaskGetMany,
-} from "../../../persistence/__dtos__/tasks.dto"
-import type { TaskResource } from "@prisma/client"
+import type { ITaskGetMany } from "../../../persistence/__dtos__/tasks.dto"
 import { compareAsc, isValid } from "date-fns"
 
-const { bulkCreateResources } = new ResourcePersistence()
-const { createTask, getTasks, updateTask } = new TaskPersistence()
+const { createTask, getTasks } = new TaskPersistence()
 
 export const get: any = [
   authMiddleware,
@@ -170,70 +165,3 @@ post.apiDoc = {
     },
   },
 }
-
-// export async function put(req: Request, res: Response) {
-//   try {
-//     const { id, title, description, deadline, patientId, attachments, status } =
-//       req.body
-//     const updatedTask = await updateTask({
-//       id,
-//       title,
-//       description,
-//       deadline,
-//       status,
-//       patientId,
-//       attachments,
-//     })
-//     res.status(200).json(updatedTask)
-//   } catch (error: any) {
-//     res.status(500).json(error.toString())
-//   }
-// }
-// put.apiDoc = {
-//   tags: ["Tasks"],
-//   summary: "Update Task",
-//   description: "Update the details of an existing task",
-//   parameters: [
-//     {
-//       name: "id",
-//       in: "path",
-//       required: true,
-//       description: "The ID of the task to update",
-//       schema: {
-//         type: "string",
-//       },
-//     },
-//   ],
-//   requestBody: {
-//     required: true,
-//     content: {
-//       "application/json": {
-//         schema: {
-//           $ref: "#/components/schemas/TaskUpdateRequest",
-//         },
-//       },
-//     },
-//   },
-//   responses: {
-//     "200": {
-//       description: "Task successfully updated",
-//       content: {
-//         "application/json": {
-//           schema: {
-//             $ref: "#/components/schemas/TaskResponse",
-//           },
-//         },
-//       },
-//     },
-//     "4XX": {
-//       description: "Bad request, invalid data provided",
-//       content: {
-//         "application/json": {
-//           schema: {
-//             $ref: "#/components/schemas/ErrorResponse",
-//           },
-//         },
-//       },
-//     },
-//   },
-// }
