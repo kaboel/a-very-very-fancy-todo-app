@@ -2,18 +2,18 @@ import { Request, Response } from "express"
 import { ResourcePersistence } from "../../../persistence/resources"
 import { TaskPersistence } from "../../../persistence/tasks"
 import authMiddleware from "../../../middlewares/authMiddleware"
-
 import type { ITaskGetMany } from "../../../persistence/__dtos__/tasks.dto"
 import { compareAsc, isValid } from "date-fns"
+import { Task } from "@prisma/client"
 
-const { createTask, getTasks } = new TaskPersistence()
+const { createTask, getTasksFiltered } = new TaskPersistence()
 
 export const get: any = [
   authMiddleware,
   async function get(req: Request, res: Response) {
     try {
       const data: ITaskGetMany = req.query
-      const tasks = await getTasks(data)
+      const tasks = await getTasksFiltered(data)
       if (!tasks) {
         return res.status(404).json({ message: "Tasks not found!" })
       }
@@ -114,6 +114,11 @@ export const post: any = [
   async function post(req: Request, res: Response) {
     try {
       const body = req.body
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "Error uploading files." })
+      }
+
       const files = req.files
       const resources = files?.map((file) => {
         return {
@@ -129,7 +134,6 @@ export const post: any = [
         resources,
       })
       res.status(200).json(task)
-      res.status(204).send()
     } catch (error: any) {
       res.status(500).json({ message: error.toString() })
     }

@@ -13,11 +13,10 @@ export interface ITaskCreate {
 }
 
 export type ITaskGetMany = {
-  search?: string
-  status?: string
   creatorId?: string
+  assigneeId?: string
   patientId?: string
-  assignedToMe?: string
+  status?: ITaskStatus | string
 }
 
 export type ITaskUpdate = {
@@ -29,6 +28,11 @@ export type ITaskUpdate = {
   completed?: boolean
   assigneeIds?: string[]
   resources?: TaskResource[]
+  resourceIdsToDelete?: string[]
+}
+
+export type ITaskDelete = Task & {
+  resources: TaskResource[]
 }
 
 export type ITaskResponse = Task & {

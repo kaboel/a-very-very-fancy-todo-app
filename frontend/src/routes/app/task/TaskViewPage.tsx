@@ -1,18 +1,24 @@
 import { useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router"
-import { selectTask } from "../../../redux/slices/tasksSlice"
+import {
+  selectTask,
+  selectTaskAssignees,
+} from "../../../redux/slices/tasksSlice"
 import { RootState } from "../../../redux/store"
 import {
+  Avatar,
+  AvatarGroup,
   Box,
   Button,
+  ButtonGroup,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Fab,
   Grid2 as Grid,
   Paper,
+  Tooltip,
   Typography,
 } from "@mui/material"
 import Edit from "@mui/icons-material/Edit"
@@ -27,14 +33,24 @@ import {
   useMarkCompleteMutation,
 } from "../../../redux/apis/tasksApi"
 import { useState } from "react"
+import { selectPatient } from "../../../redux/slices/patientsSlice"
+import { initials, stringToColor } from "../../../helpers/miscellaneos"
 
 export default function TaskViewPage() {
   const navigate = useNavigate()
   const { id: taskId } = useParams<{ id: string }>()
   const user = useSelector(selectCurrentUser)
-  const task = useSelector((state: RootState) => selectTask(state, taskId))
+  const task = useSelector((state: RootState) =>
+    selectTask(state, taskId || "")
+  )
   const creator = useSelector((state: RootState) =>
     selectUser(state, task?.creatorId || "")
+  )
+  const patient = useSelector((state: RootState) =>
+    selectPatient(state, task?.patientId || "")
+  )
+  const assignees = useSelector((state: RootState) =>
+    selectTaskAssignees(state, taskId || "")
   )
   const isCreator = task?.creatorId === user?.id
   const isCompleted = task?.completed
@@ -54,7 +70,7 @@ export default function TaskViewPage() {
   const handleOpenDialog = () => setDialogIsOpen(true)
   const handleCloseDialog = () => setDialogIsOpen(false)
   const handleDeleteTask = async () => {
-    await deleteTask({ id: task?.id || "" })
+    await deleteTask({ id: task?.id || "" }).unwrap()
     navigate("/")
   }
 
@@ -68,23 +84,44 @@ export default function TaskViewPage() {
               Creator: <b>{isCreator ? "Me" : creator?.name}</b>
             </Typography>
             <Typography variant="body2">
+              Patient: <b>{patient?.name}</b>
+            </Typography>
+            <Typography variant="body2">
               Due: <b>{formatReadable(task?.deadline || new Date())}</b>
             </Typography>
           </Box>
         </Grid>
         {isCreator && !isCompleted && (
           <Grid size={2} sx={{ textAlign: "right" }}>
-            <Fab
-              color="primary"
-              size="small"
-              sx={{ mr: 1 }}
-              onClick={() => navigateToEdit(task?.id)}
+            <ButtonGroup
+              disableElevation
+              variant="contained"
+              aria-label="Disabled button group"
             >
-              <Edit />
-            </Fab>
-            <Fab color="error" size="small" onClick={handleOpenDialog}>
-              <Delete />
-            </Fab>
+              <Button color="primary" onClick={() => navigateToEdit(task?.id)}>
+                <Edit />
+              </Button>
+              <Button color="error" onClick={handleOpenDialog}>
+                <Delete />
+              </Button>
+            </ButtonGroup>
+
+            {assignees && (
+              <Tooltip title={`Assigned to ${assignees.length} people.`}>
+                <AvatarGroup max={3} sx={{ mt: 3 }}>
+                  {assignees.map((assignee) => (
+                    <Avatar
+                      sx={{
+                        bgcolor: stringToColor(assignee.name),
+                        fontSize: "small",
+                      }}
+                    >
+                      {initials(assignee.name)}
+                    </Avatar>
+                  ))}
+                </AvatarGroup>
+              </Tooltip>
+            )}
           </Grid>
         )}
       </Grid>

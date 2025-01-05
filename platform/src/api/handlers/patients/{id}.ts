@@ -2,12 +2,18 @@ import { Request, Response } from "express"
 import authMiddleware from "../../../middlewares/authMiddleware"
 import { PatientPersistence } from "../../../persistence/patients"
 
-const { deletePatient } = new PatientPersistence()
+const { deletePatient, updatePatient } = new PatientPersistence()
 
 export const put: any = [
   authMiddleware,
   async function put(req: Request, res: Response) {
     try {
+      const taskId = req.params.id
+      const updated = await updatePatient(taskId, req.body)
+      if (!updated) {
+        res.status(403).json({ message: "Forbidden" })
+      }
+      res.status(200).json(updated)
     } catch (error: any) {
       res.status(500).json({ message: error.toString() })
     }

@@ -11,6 +11,8 @@ export type IPatientCreate = {
 
 export type IPatientUpdate = {
   id: string
-  firstname?: string
-  lastname?: string
+  name?: string
+  phone?: string
+  address?: string
+  doctorIds?: string[]
 }

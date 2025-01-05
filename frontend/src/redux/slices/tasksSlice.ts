@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { ITask, ITaskStatus } from "../../helpers/types"
 import { tasksApi } from "../apis/tasksApi"
 import { isBefore, parseISO } from "date-fns"
@@ -27,7 +27,6 @@ function addTaskStatuses(tasks: ITask[]): ITask[] {
     } else {
       status = TASK_STATUS.NEW
     }
-
     return { ...task, status }
   })
 }
@@ -35,7 +34,16 @@ function addTaskStatuses(tasks: ITask[]): ITask[] {
 export const tasksSlice = createSlice({
   name: "tasks",
   initialState,
-  reducers: {},
+  reducers: {
+    updateTask(state, action: PayloadAction<ITask>) {
+      const index = state.list.findIndex(
+        (task) => task.id === action.payload.id
+      )
+      if (index !== -1) {
+        state.list[index] = action.payload
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder.addMatcher(
       tasksApi.endpoints.getTasks.matchFulfilled,
@@ -46,6 +54,15 @@ export const tasksSlice = createSlice({
   },
 })
 
+export const { updateTask } = tasksSlice.actions
 export const selectTasks = (state: RootState) => state.tasks.list
-export const selectTask = (state: RootState, taskId: string | undefined) =>
+export const selectTask = (state: RootState, taskId: string) =>
   state.tasks.list.find((task) => task.id === taskId)
+export const selectTaskAssignees = (state: RootState, taskId: string) => {
+  const task = selectTask(state, taskId)
+  const assigneeIds = task?.assignments?.map((assignee) => assignee.userId)
+  const users = state.users.list.filter((user) =>
+    assigneeIds?.some((assId) => assId === user.id)
+  )
+  return users
+}

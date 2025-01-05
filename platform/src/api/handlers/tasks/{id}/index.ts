@@ -1,8 +1,9 @@
 import { Request, Response } from "express"
 import { TaskPersistence } from "../../../../persistence/tasks"
 import authMiddleware from "../../../../middlewares/authMiddleware"
+import { unlinkResource } from "../../../../middlewares/uploadMiddleware"
 
-const { getTask, deleteTask, updateTask } = new TaskPersistence()
+const { getTask, deleteTask, updateTask, getResource } = new TaskPersistence()
 
 export async function get(req: Request, res: Response) {
   try {
@@ -56,13 +57,20 @@ export const del: any = [
   async function del(req: Request, res: Response) {
     try {
       const { id: taskId } = req.params
-      const deleted = await deleteTask(taskId)
-      if (!deleted) {
-        res.status(403).json({ message: `Unauthorized` })
+      const task = await deleteTask(taskId)
+      if (!task) {
+        return res.status(403).json({ message: `Unauthorized` })
       }
-      res.status(200).json({
-        message: "Task deleted!",
-        id: deleted.id,
+
+      if (task.resources.length > 0) {
+        task.resources.forEach((resource) => {
+          unlinkResource(resource)
+        })
+      }
+
+      return res.status(200).json({
+        message: "Task and associated resources deleted!",
+        id: task.id,
       })
     } catch (error: any) {
       res.status(500).json(error.toString())
@@ -107,8 +115,26 @@ export const put: any = [
   async function put(req: Request, res: Response) {
     try {
       const taskId = req.params.id
+      const resourceIds = req.body.resourceIdsToDelete
+      if (resourceIds && resourceIds.length > 0) {
+        for (const resourceId of resourceIds) {
+          const resource = await getResource(resourceId)
+          unlinkResource(resource)
+        }
+      }
 
-      const updated = await updateTask(taskId, req.body)
+      const files = req.files
+      const resources = files?.map((file) => {
+        return {
+          originalName: file.originalname,
+          filename: file.filename,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: `/uploads/${file.filename}`,
+        }
+      })
+
+      const updated = await updateTask(taskId, { ...req.body, resources })
       if (!updated) {
         res.status(403).json({ message: "Forbidden" })
       }

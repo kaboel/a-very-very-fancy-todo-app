@@ -44,8 +44,9 @@ export default function FilesGrid({ files }: FilesGridProps) {
   return (
     <Box>
       <Grid container spacing={2} padding={2}>
-        {files.map((file) => (
+        {files.map((file, index) => (
           <Card
+            key={index}
             sx={{ maxWidth: "30%", display: "flex", flexDirection: "column" }}
           >
             <CardActionArea

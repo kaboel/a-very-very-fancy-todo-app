@@ -1,12 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
 import type { ITask } from "../../helpers/types"
-
-export interface ITaskFilters {
-  creatorId?: string
-  patientId?: string
-  assignedToMe?: boolean
-}
+import { ITasksFilter } from "../../components/TasksFilter"
 
 export interface IUpsertTask {
   title: string
@@ -42,14 +37,16 @@ export const tasksApi = createApi({
   }),
   tagTypes: ["Tasks"],
   endpoints: (builder) => ({
-    getTasks: builder.query<ITask[], ITaskFilters>({
+    getTasks: builder.query<ITask[], ITasksFilter>({
       query: (filters) => {
         const params = new URLSearchParams()
-        const { creatorId, patientId, assignedToMe } = filters
+        const { creatorId, assigneeId, patientId, status } = filters
         if (creatorId) params.append("creatorId", creatorId)
         if (patientId) params.append("patientId", patientId)
-        if (assignedToMe) params.append("assignedToMe", "true")
-        return `/?${params.toString()}`
+        if (assigneeId) params.append("assigneeId", assigneeId)
+        if (status) params.append("status", status)
+        const queryString = params.toString()
+        return queryString ? `/?${queryString}` : `/`
       },
       providesTags: ["Tasks"],
     }),

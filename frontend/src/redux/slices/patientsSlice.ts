@@ -25,5 +25,6 @@ export const patientsSlice = createSlice({
   },
 })
 
+export const selectPatients = (state: RootState) => state.patients.list
 export const selectPatient = (state: RootState, patientId: string) =>
   state.patients.list.find((patient) => patient.id === patientId)

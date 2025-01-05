@@ -32,16 +32,15 @@ export default function ProfileBox({ profile }: ProfileBoxProps) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { name, email, role, doctorNumber } = profile
+
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false)
+  const handleOpenLogoutDialog = () => setOpenLogoutDialog(true)
+  const handleCloseLogoutDialog = () => setOpenLogoutDialog(false)
 
   const handleLogout = () => {
     dispatch(logout())
     navigate("/auth/login")
   }
-
-  const handleOpenLogoutDialog = () => setOpenLogoutDialog(true)
-  const handleCloseLogoutDialog = () => setOpenLogoutDialog(false)
-
   return (
     <Box
       sx={{

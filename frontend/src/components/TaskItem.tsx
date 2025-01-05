@@ -23,10 +23,15 @@ import { TASK_STATUS } from "../helpers/constants"
 import { useState } from "react"
 import { useMarkCompleteMutation } from "../redux/apis/tasksApi"
 import { useNavigate } from "react-router"
+import { RootState } from "../redux/store"
+import { selectUser } from "../redux/slices/usersSlice"
 
 export default function TaskItem({ task }: { task: ITask }) {
   const navigate = useNavigate()
   const currentUser = useSelector(selectCurrentUser)
+  const taskCreator = useSelector((state: RootState) =>
+    selectUser(state, task.creatorId)
+  )
   const isComplete = !!task.completed
   const isCreator = task.creatorId === currentUser?.id
   const isAssigned = !!task?.assignments?.find(
@@ -90,7 +95,12 @@ export default function TaskItem({ task }: { task: ITask }) {
               justifyContent: "center",
             }}
           >
-            <Typography variant="h5">{task.title}</Typography>
+            <Typography variant="h5" sx={{ pb: 0, mb: 0 }}>
+              {task.title}
+            </Typography>
+            <Typography variant="caption" color="primary">
+              By {taskCreator?.name}
+            </Typography>
             {task.status === TASK_STATUS.OVERDUE ? (
               <Typography variant="caption" color="red">
                 Overdue

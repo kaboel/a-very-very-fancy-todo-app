@@ -19,6 +19,11 @@ properties:
     items:
       type: string
     nullable: true
+  resourceIdsToDelete:
+    type: array
+    items:
+      type: string
+    nullable: true
   resources:
     type: array
     items:

@@ -1,20 +1,24 @@
 import { useState, ChangeEvent } from "react"
 import { Chip, Box, Button, Typography, Divider } from "@mui/material"
 import { FileUpload } from "@mui/icons-material"
+import { ITaskResource } from "../helpers/types"
 
 interface FileSelectorProps {
+  existingFiles?: ITaskResource[] | null
   onFilesSelect: (files: File[] | null) => void
+  onFileDelete: (file: ITaskResource) => void
 }
 
 export default function FileSelector(props: FileSelectorProps) {
-  const { onFilesSelect } = props
+  const { onFilesSelect, onFileDelete, existingFiles } = props
   const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null)
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files) {
-      setSelectedFiles(Array.from(files))
-      onFilesSelect(Array.from(files))
+      const newFiles = Array.from(files)
+      setSelectedFiles(newFiles)
+      onFilesSelect(newFiles)
     }
   }
 
@@ -33,6 +37,19 @@ export default function FileSelector(props: FileSelectorProps) {
 
   return (
     <Box>
+      {existingFiles && existingFiles.length > 0 && (
+        <Box>
+          <Typography variant="body2">Existing resources</Typography>
+          {existingFiles.map((file, index) => (
+            <Chip
+              key={index}
+              label={file.originalName}
+              onDelete={() => onFileDelete(file)}
+            />
+          ))}
+        </Box>
+      )}
+
       <Divider sx={{ mb: 2 }} />
       <input
         type="file"

@@ -210,7 +210,7 @@ export default function UpsertPatientPage() {
         />
         {createError && (
           <Typography variant="caption" color="error">
-            Patient creation failed. Please try again.
+            Creation failed. Please try again.
           </Typography>
         )}
         {updateError && (

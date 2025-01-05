@@ -52,14 +52,30 @@ export class PatientPersistence {
     return patients
   }
 
-  async updatePatient({ id, ...payload }: IPatientUpdate): Promise<Patient> {
+  async updatePatient(
+    patientId: string,
+    data: Partial<IPatientUpdate>
+  ): Promise<Patient> {
     try {
+      const { name, phone, address, doctorIds } = data
       const updated = await prisma.patient.update({
-        where: { id },
-        data: payload,
+        where: { id: patientId },
+        data: {
+          ...(name && { name }),
+          ...(phone && { phone }),
+          ...(address && { address }),
+          ...(doctorIds?.length && {
+            doctors: {
+              deleteMany: {},
+              create: doctorIds?.map((doctorId) => ({
+                doctorId,
+              })),
+            },
+          }),
+        },
       })
       if (!updated) {
-        throw new Error(`Patient with id ${id} cannot be updated`)
+        throw new Error(`Patient with id ${patientId} cannot be updated`)
       }
       return updated
     } catch (error: any) {

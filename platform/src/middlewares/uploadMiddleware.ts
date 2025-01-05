@@ -1,9 +1,31 @@
+import { TaskResource } from "@prisma/client"
 import { randomUUID } from "crypto"
 import { Request, Response, NextFunction } from "express"
 import multer, { StorageEngine } from "multer"
 import path from "path"
+import fs from "fs"
 
-const allowedTypes: string[] = ["image/png", "image/jpg", "application/pdf"]
+const allowedTypes: string[] = [
+  // Documents
+  "application/pdf", // PDF
+  "application/msword", // .doc (Microsoft Word)
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx (Microsoft Word)
+  "application/vnd.ms-excel", // .xls (Microsoft Excel)
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx (Microsoft Excel)
+  "application/vnd.ms-powerpoint", // .ppt (Microsoft PowerPoint)
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx (Microsoft PowerPoint)
+  "text/plain", // Text files
+  "application/rtf", // Rich Text Format
+
+  // Images
+  "image/jpeg", // .jpg, .jpeg
+  "image/png", // .png
+  "image/gif", // .gif
+  "image/bmp", // .bmp
+  "image/tiff", // .tiff
+  "image/webp", // .webp
+  "image/svg+xml", // .svg (Scalable Vector Graphics)
+]
 
 const storage: StorageEngine = multer.diskStorage({
   destination: (_, __, cb) => {
@@ -31,9 +53,16 @@ const fileFilter = (
 const upload = multer({
   storage,
   fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB limit
+  },
 }).array("resources")
 
-function uploadMiddleware(req: Request, res: Response, next: NextFunction) {
+export default function uploadMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   upload(req, res, (error: any) => {
     if (error instanceof multer.MulterError) {
       console.error(error)
@@ -47,4 +76,11 @@ function uploadMiddleware(req: Request, res: Response, next: NextFunction) {
   })
 }
 
-export default uploadMiddleware
+export function unlinkResource(resource: TaskResource): void {
+  const filePath = path.join(__dirname, "../../uploads", resource.filename)
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      throw new Error(err.toString())
+    }
+  })
+}

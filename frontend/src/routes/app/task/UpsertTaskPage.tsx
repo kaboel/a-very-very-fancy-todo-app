@@ -1,8 +1,10 @@
-import { useNavigate } from "react-router"
+import { useState } from "react"
+import { useNavigate, useParams } from "react-router"
 import { useForm, Controller } from "react-hook-form"
 import {
   IUpsertTask,
   useCreateTaskMutation,
+  useUpdateTaskMutation,
 } from "../../../redux/apis/tasksApi"
 import {
   Box,
@@ -20,10 +22,12 @@ import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers"
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3"
 import FileSelector from "../../../components/FileSelector"
 import { useGetUsersQuery } from "../../../redux/apis/usersApi"
-import { IPatient, IUser } from "../../../helpers/types"
+import { IPatient, ITaskResource, IUser } from "../../../helpers/types"
 import { useGetPatientsQuery } from "../../../redux/apis/patientApi"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { selectCurrentUser } from "../../../redux/slices/authSlice"
+import { RootState } from "../../../redux/store"
+import { selectTask, updateTask } from "../../../redux/slices/tasksSlice"
 
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
@@ -37,10 +41,18 @@ const MenuProps = {
 }
 
 export default function UpsertTaskPage() {
+  const { id: taskId } = useParams<{ id: string }>()
+  const task = useSelector((state: RootState) =>
+    selectTask(state, taskId || "")
+  )
+
   const { data: users } = useGetUsersQuery()
   const { data: patients } = useGetPatientsQuery()
   const currentUser = useSelector(selectCurrentUser)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const [filesToDelete, setFilesToDelete] = useState<ITaskResource[]>([])
 
   const {
     reset,
@@ -50,13 +62,18 @@ export default function UpsertTaskPage() {
     formState: { errors },
   } = useForm<IUpsertTask>({
     defaultValues: {
-      deadline: new Date(),
-      assigneeIds: [],
-      patientId: "",
+      title: task?.title || "",
+      description: task?.description || "",
+      deadline: new Date(task?.deadline || Date.now()),
+      assigneeIds: task?.assignments?.map((el) => el.userId) || [],
+      patientId: task?.patientId || "",
       resources: [],
     },
   })
-  const [createTask, { isLoading }] = useCreateTaskMutation()
+
+  const [createTask, { isError: createError }] = useCreateTaskMutation()
+  const [updateTaskRemote, { isError: updateError }] = useUpdateTaskMutation()
+
   const onSubmit = async (data: IUpsertTask) => {
     try {
       const formData = new FormData()
@@ -71,10 +88,22 @@ export default function UpsertTaskPage() {
       data.resources.forEach((resource) =>
         formData.append("resources", resource)
       )
-      await createTask(formData)
-      navigate("/")
+      if (!taskId) {
+        await createTask(formData).unwrap()
+        navigate("/")
+      } else {
+        filesToDelete.forEach((resource) =>
+          formData.append("resourceIdsToDelete[]", resource.id)
+        )
+        const updated = await updateTaskRemote({
+          id: taskId || "",
+          data: formData,
+        }).unwrap()
+        dispatch(updateTask(updated))
+        navigate(`/tasks/${taskId}`)
+      }
     } catch (error) {
-      console.error("Error creating task:", error)
+      console.error("Upsert Operation Error:", error)
     }
   }
 
@@ -85,7 +114,7 @@ export default function UpsertTaskPage() {
       onSubmit={handleSubmit(onSubmit)}
     >
       <Typography variant="h4" color="#666">
-        Create task
+        {!taskId ? "Create " : "Update "} Task
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", mt: 3 }}>
         <TextField
@@ -181,25 +210,39 @@ export default function UpsertTaskPage() {
             </FormControl>
           )}
         />
+
         <Controller
           control={control}
           name="resources"
           render={({ field }) => (
             <FileSelector
+              existingFiles={task?.resources?.filter(
+                (resource) =>
+                  !filesToDelete.some((toDelete) => toDelete.id === resource.id)
+              )}
               onFilesSelect={(prevSelection) => field.onChange(prevSelection)}
+              onFileDelete={(file) =>
+                setFilesToDelete((prev) => [...prev, file])
+              }
             />
           )}
         />
+
+        {createError && (
+          <Typography variant="caption" color="error">
+            Creation failed. Please try again.
+          </Typography>
+        )}
+        {updateError && (
+          <Typography variant="caption" color="error">
+            Update failed. Please try again.
+          </Typography>
+        )}
       </Box>
       <Grid container spacing={2} sx={{ mt: 2 }} justifyContent="flex-end">
         <Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            disabled={isLoading}
-          >
-            Create
+          <Button type="submit" fullWidth variant="contained">
+            Save
           </Button>
         </Grid>
         <Grid>
