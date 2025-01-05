@@ -39,6 +39,12 @@ To test the frontend, follow these steps:
     - Once the frontend is running, open your browser and navigate to http://localhost:8000. The application will be served at this address.
 
 2.  **Test User Authentication & Registration**:
+   
+      <p align="center">
+         <img src="https://github.com/user-attachments/assets/520c7308-5c82-4d27-b0b7-d3f4a28b3f6f" width="35%" />
+         <img src="https://github.com/user-attachments/assets/7258b4b4-4fb5-451f-b838-217bc0481502" width="35%" />
+      </p>
+
 
     - On the frontend, navigate to the Registration page and create a new user account.
 
@@ -46,7 +52,13 @@ To test the frontend, follow these steps:
 
     - After logging in successfully, you will be redirected to the main Dashboard.
 
-3.  **Test Task Management**:
+4.  **Test Task Management**:
+
+      <p align="center">
+         <img src="https://github.com/user-attachments/assets/c6b609a6-abae-4d5b-849b-7cfd63ec04fe" width="45%" />
+         <img src="https://github.com/user-attachments/assets/5fb9eebc-48cc-4aaa-b906-742f7f526de4" width="45%" />
+         <img src="https://github.com/user-attachments/assets/13275bad-6488-4113-bb13-3165796e593d" width="45%" />
+      </p>
 
     - On the Dashboard, you will be able to create new tasks and view existing tasks.
 
@@ -54,7 +66,12 @@ To test the frontend, follow these steps:
 
     - You can also try other task actions like viewing, editing, or deleting tasks.
 
-4.  **Test Patient and Profile Managements**:
+6.  **Test Patient and Profile Managements**:
+
+      <p align="center">
+         <img src="https://github.com/user-attachments/assets/1c7cb618-398a-43a8-8fcc-41886f93c21b" width="45%" />
+         <img src="https://github.com/user-attachments/assets/b380d913-89cd-4b6c-b99e-9503bceca3a6" width="45%" />
+      </p>
 
     - On the left side of the screen, you’ll find a sidebar containing your profile and navigation options.
 
