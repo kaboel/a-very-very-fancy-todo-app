@@ -81,13 +81,23 @@ const migrateDatabase = async () => {
   }
 };
 
+const makeUploadsDir = () => {
+  const folderPath = path.join(__dirname, "../uploads");
+
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath);
+    console.log("Folder /uploads created at root!");
+  }
+};
+
 (async function initializeApp() {
+  makeUploadsDir();
   await generateEnv();
   await migrateDatabase();
 })()
   .then(() => {
     console.log("Project initialized!");
-    console.log("You may now run `npm run dev` to start the server.")
+    console.log("\nYou may now run `npm run dev` to start the server.");
     process.exit();
   })
   .catch((err) => {
