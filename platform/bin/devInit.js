@@ -25,17 +25,6 @@ const runCommand = (command) => {
   });
 };
 
-const installDeps = async () => {
-  try {
-    console.log("Installing dependencies...");
-    const result = await runCommand("npm install");
-    console.log(result);
-  } catch (error) {
-    console.error("Failed to install dependencies:", error);
-    process.exit(1);
-  }
-};
-
 const initForm = async () => {
   const questions = [
     "Enter your PostgreSQL username: ",
@@ -93,7 +82,6 @@ const migrateDatabase = async () => {
 };
 
 (async function initializeApp() {
-  await installDeps();
   await generateEnv();
   await migrateDatabase();
 })()
