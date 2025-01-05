@@ -46,7 +46,7 @@ To populate the database with predefined data:
 1. Run the seeder script:
 
    ```bash
-   npm run seed
+   npm run migrate:seed
    ```
 
    This will:
