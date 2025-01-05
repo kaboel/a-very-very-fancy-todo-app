@@ -40,3 +40,18 @@ export function fullName(
   const trimmedLast = lastname?.trim() || ""
   return [trimmedFirst, trimmedLast].filter(Boolean).join(" ")
 }
+
+export function downloadFile(origin: string, filePath: string) {
+  const fileUrl = `${origin}${filePath}`
+  fetch(fileUrl)
+    .then((res) => res.blob())
+    .then((blob) => {
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = filePath.split("/").pop() || "file"
+      link.click()
+      window.URL.revokeObjectURL(url)
+    })
+    .catch((error) => console.error("Error downloading file: ", error))
+}

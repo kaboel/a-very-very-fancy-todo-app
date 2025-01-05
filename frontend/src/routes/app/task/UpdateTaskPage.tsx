@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import { useForm, Controller } from "react-hook-form"
 import {
   IUpsertTask,
-  useCreateTaskMutation,
+  useUpdateTaskMutation,
 } from "../../../redux/apis/tasksApi"
 import {
   Box,
@@ -24,6 +24,8 @@ import { IPatient, IUser } from "../../../helpers/types"
 import { useGetPatientsQuery } from "../../../redux/apis/patientApi"
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from "../../../redux/slices/authSlice"
+import { selectTask } from "../../../redux/slices/tasksSlice"
+import { RootState } from "../../../redux/store"
 
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
@@ -36,7 +38,9 @@ const MenuProps = {
   },
 }
 
-export default function UpsertTaskPage() {
+export default function UpdateTaskPage() {
+  const { id: taskId } = useParams<{ id: string }>()
+  const task = useSelector((state: RootState) => selectTask(state, taskId))
   const { data: users } = useGetUsersQuery()
   const { data: patients } = useGetPatientsQuery()
   const currentUser = useSelector(selectCurrentUser)
@@ -50,13 +54,15 @@ export default function UpsertTaskPage() {
     formState: { errors },
   } = useForm<IUpsertTask>({
     defaultValues: {
-      deadline: new Date(),
-      assigneeIds: [],
-      patientId: "",
-      resources: [],
+      title: task?.title,
+      description: task?.description,
+      deadline: new Date(task?.deadline || ""),
+      assigneeIds: task?.assignments?.map((el) => el.userId) || [],
+      patientId: task?.patientId || "",
+      resources: task?.resources,
     },
   })
-  const [createTask, { isLoading }] = useCreateTaskMutation()
+  const [updateTask, { isLoading }] = useUpdateTaskMutation()
   const onSubmit = async (data: IUpsertTask) => {
     try {
       const formData = new FormData()
@@ -71,10 +77,10 @@ export default function UpsertTaskPage() {
       data.resources.forEach((resource) =>
         formData.append("resources", resource)
       )
-      await createTask(formData)
+      await updateTask({ id: taskId || "", data: formData })
       navigate("/")
     } catch (error) {
-      console.error("Error creating task:", error)
+      console.error("Error updating task:", error)
     }
   }
 
@@ -85,7 +91,7 @@ export default function UpsertTaskPage() {
       onSubmit={handleSubmit(onSubmit)}
     >
       <Typography variant="h4" color="#666">
-        Create task
+        Update task
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", mt: 3 }}>
         <TextField
@@ -199,7 +205,7 @@ export default function UpsertTaskPage() {
             variant="contained"
             disabled={isLoading}
           >
-            Create
+            Save
           </Button>
         </Grid>
         <Grid>

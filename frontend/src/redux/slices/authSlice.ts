@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { IUser } from "../../helpers/types"
 import { RootState } from "../store"
 import { authApi } from "../apis/authApi"
+import { usersApi } from "../apis/usersApi"
 
 interface AuthState {
   user: IUser | null
@@ -44,6 +45,14 @@ export const authSlice = createSlice({
     builder.addMatcher(
       authApi.endpoints.register.matchFulfilled,
       handleAuthFulfilled
+    )
+    builder.addMatcher(
+      usersApi.endpoints.updateUser.matchFulfilled,
+      (state, { payload }) => {
+        if (state.user?.id === payload.id) {
+          state.user = payload
+        }
+      }
     )
   },
 })

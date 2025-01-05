@@ -9,12 +9,19 @@ import {
   Select,
   MenuItem,
 } from "@mui/material"
-import { useNavigate } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import { useGetUsersQuery } from "../../../redux/apis/usersApi"
 import { Controller, useForm } from "react-hook-form"
 import { IUser } from "../../../helpers/types"
 import { USER_ROLES } from "../../../helpers/constants"
 import { useMemo } from "react"
+import {
+  useCreatePatientMutation,
+  useUpdatePatientMutation,
+} from "../../../redux/apis/patientApi"
+import { useSelector } from "react-redux"
+import { selectPatient } from "../../../redux/slices/patientsSlice"
+import { RootState } from "../../../redux/store"
 
 interface IUpsertPatientForm {
   id?: string
@@ -36,11 +43,18 @@ const MenuProps = {
 }
 
 export default function UpsertPatientPage() {
+  const { id: patientId } = useParams<{ id: string }>()
+  const patient = useSelector((state: RootState) =>
+    selectPatient(state, patientId || "")
+  )
+  //
   const { data: users, isLoading } = useGetUsersQuery()
   const doctors = useMemo(
     () => users?.filter((user) => user.role === USER_ROLES.DOCTOR),
     [users]
   )
+  const [createPatient, { isError: createError }] = useCreatePatientMutation()
+  const [updatePatient, { isError: updateError }] = useUpdatePatientMutation()
 
   const navigate = useNavigate()
   const {
@@ -49,24 +63,31 @@ export default function UpsertPatientPage() {
     formState: { errors },
   } = useForm<IUpsertPatientForm>({
     defaultValues: {
-      doctorIds: [],
+      name: patient?.name || "",
+      phone: patient?.phone || "",
+      address: patient?.address || "",
+      doctorIds: patient?.doctors?.map((doc) => doc.doctorId) || [],
     },
   })
 
   const onSubmit = async (data: IUpsertPatientForm) => {
-    //
-    return
-    await handleSubmit(data)
+    if (!patientId) {
+      await createPatient(data)
+    } else {
+      await updatePatient({ id: patientId, data })
+    }
+    navigate("/patients")
   }
 
   return (
     <Box
       sx={{ p: 3, px: 10 }}
       component="form"
-      onSubmit={() => handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit)}
     >
       <Typography variant="h4" color="#666">
-        Add Patient
+        {!patientId ? "Add " : "Update "}
+        Patient
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", mt: 3 }}>
         <Controller
@@ -187,6 +208,16 @@ export default function UpsertPatientPage() {
             </FormControl>
           )}
         />
+        {createError && (
+          <Typography variant="caption" color="error">
+            Patient creation failed. Please try again.
+          </Typography>
+        )}
+        {updateError && (
+          <Typography variant="caption" color="error">
+            Update failed. Please try again.
+          </Typography>
+        )}
       </Box>
       <Grid container spacing={2} sx={{ mt: 2 }} justifyContent="flex-end">
         <Grid>

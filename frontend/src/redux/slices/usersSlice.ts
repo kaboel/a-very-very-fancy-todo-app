@@ -26,3 +26,5 @@ export const usersSlice = createSlice({
 })
 
 export const selectUsers = (state: RootState) => state.users.list
+export const selectUser = (state: RootState, userId: string) =>
+  state.users.list.find((user) => user.id === userId)

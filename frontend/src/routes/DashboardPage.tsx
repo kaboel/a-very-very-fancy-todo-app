@@ -2,7 +2,6 @@ import { Outlet } from "react-router"
 import { Box, Divider, Grid2 as Grid, Paper, styled } from "@mui/material"
 import HomePaper from "../components/HomePaper"
 import ProfileBox from "../components/ProfileBox"
-import TasksSummary from "../components/TasksSummary"
 import Navigation from "../components/Navigation"
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from "../redux/slices/authSlice"
@@ -28,8 +27,6 @@ export default function DashboardPage() {
         <Grid size="grow">
           <StyledPaper>
             <ProfileBox loading={false} profile={userData} />
-            <Divider />
-            <TasksSummary />
             <Divider />
             <Navigation />
           </StyledPaper>

@@ -1,6 +1,6 @@
 import { format } from "date-fns"
 
-export function formatReadable(date: Date | string) {
+export function formatReadable(date: Date | string | number) {
   return format(new Date(date), "EEE, d.M.yyyy (HH:mm)")
 }
 

@@ -6,7 +6,6 @@ import {
   Box,
   Typography,
   Grid2 as Grid,
-  Alert,
   CircularProgress,
 } from "@mui/material"
 import AuthPaper from "../../components/AuthPaper"
@@ -21,7 +20,7 @@ interface ILoginForm {
 const Login = () => {
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
-  const [login, { isLoading, isError }] = useLoginMutation()
+  const [login, { isLoading }] = useLoginMutation()
 
   const {
     register,
@@ -31,14 +30,12 @@ const Login = () => {
 
   const onSubmit = async (data: ILoginForm) => {
     try {
-      await login(data)
-      if (isError) {
-        setError("Invalid email or password.")
-        return
-      }
+      await login(data).unwrap()
+      setError(null)
       navigate("/")
-    } catch (error) {
-      console.error(error)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err?.data?.message || "Invalid email or password.")
     }
   }
 
@@ -52,12 +49,6 @@ const Login = () => {
         <Typography variant="h4" gutterBottom align="center">
           Login
         </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
 
         <TextField
           fullWidth
@@ -85,6 +76,12 @@ const Login = () => {
           helperText={errors.password?.message}
           sx={{ mb: 2 }}
         />
+
+        {error && (
+          <Typography color="error" variant="caption" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+        )}
 
         <Button
           type="submit"

@@ -8,7 +8,7 @@ export interface ITaskFilters {
   assignedToMe?: boolean
 }
 
-export interface IUpsertTaskForm {
+export interface IUpsertTask {
   title: string
   description: string
   deadline: Date
@@ -18,15 +18,19 @@ export interface IUpsertTaskForm {
   resources: File[]
 }
 
-const generateTags = (result: ITask[] | undefined, type: "Tasks") =>
-  result
-    ? [...result.map(({ id }) => ({ type, id })), { type, id: "LIST" }]
-    : [{ type, id: "LIST" }]
+interface ITaskUpdate {
+  id: string
+  data: FormData
+}
+
+interface ITaskMarkComplete {
+  id: string
+}
 
 export const tasksApi = createApi({
   reducerPath: "tasksApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/api",
+    baseUrl: "http://localhost:3000/api/tasks",
     credentials: "include",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token")
@@ -45,19 +49,53 @@ export const tasksApi = createApi({
         if (creatorId) params.append("creatorId", creatorId)
         if (patientId) params.append("patientId", patientId)
         if (assignedToMe) params.append("assignedToMe", "true")
-        return `/tasks?${params.toString()}`
+        return `/?${params.toString()}`
       },
-      providesTags: (result) => generateTags(result, "Tasks"),
+      providesTags: ["Tasks"],
+    }),
+    getSummary: builder.query<ITask[], { id: string }>({
+      query: ({ id }) => ({
+        url: `/${id}/summary`,
+      }),
     }),
     createTask: builder.mutation<void, FormData>({
       query: (payload) => ({
-        url: "tasks",
+        url: "/",
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: [{ type: "Tasks", id: "LIST" }],
+      invalidatesTags: ["Tasks"],
+    }),
+    updateTask: builder.mutation<ITask, ITaskUpdate>({
+      query: ({ id, data }) => ({
+        url: `/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Tasks"],
+    }),
+    markComplete: builder.mutation<ITask, ITaskMarkComplete>({
+      query: ({ id }) => ({
+        url: `/${id}/mark`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Tasks"],
+    }),
+    deleteTask: builder.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Tasks"],
     }),
   }),
 })
 
-export const { useGetTasksQuery, useCreateTaskMutation } = tasksApi
+export const {
+  useGetTasksQuery,
+  useGetSummaryQuery,
+  useCreateTaskMutation,
+  useMarkCompleteMutation,
+  useUpdateTaskMutation,
+  useDeleteTaskMutation,
+} = tasksApi

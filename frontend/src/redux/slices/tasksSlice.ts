@@ -47,3 +47,5 @@ export const tasksSlice = createSlice({
 })
 
 export const selectTasks = (state: RootState) => state.tasks.list
+export const selectTask = (state: RootState, taskId: string | undefined) =>
+  state.tasks.list.find((task) => task.id === taskId)

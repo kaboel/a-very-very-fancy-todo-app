@@ -52,7 +52,7 @@ export type ITaskResource = {
   filename: string
   mimetype: string
   size: string
-  resourceType: IResourceType
+  path: string
   task: ITask
   createdAt?: string | Date
 } & File

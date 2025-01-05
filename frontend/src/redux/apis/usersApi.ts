@@ -2,6 +2,14 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
 import type { IUser } from "../../helpers/types"
 
+interface IUpdateUserRequest {
+  id?: string
+  data: {
+    name?: string
+    email?: string
+  }
+}
+
 export const usersApi = createApi({
   reducerPath: "usersApi",
   baseQuery: fetchBaseQuery({
@@ -17,9 +25,19 @@ export const usersApi = createApi({
   }),
   endpoints: (builder) => ({
     getUsers: builder.query<IUser[], void>({
-      query: () => "/users",
+      query: () => ({
+        url: "/users",
+        method: "GET",
+      }),
+    }),
+    updateUser: builder.mutation<IUser, IUpdateUserRequest>({
+      query: ({ id, data }) => ({
+        url: `/users/${id}`,
+        method: "PUT",
+        body: data,
+      }),
     }),
   }),
 })
 
-export const { useGetUsersQuery } = usersApi
+export const { useGetUsersQuery, useUpdateUserMutation } = usersApi
