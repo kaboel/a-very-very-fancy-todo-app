@@ -114,11 +114,6 @@ export const post: any = [
   async function post(req: Request, res: Response) {
     try {
       const body = req.body
-
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ message: "Error uploading files." })
-      }
-
       const files = req.files
       const resources = files?.map((file) => {
         return {

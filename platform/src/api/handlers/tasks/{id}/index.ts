@@ -5,20 +5,23 @@ import { unlinkResource } from "../../../../middlewares/uploadMiddleware"
 
 const { getTask, deleteTask, updateTask, getResource } = new TaskPersistence()
 
-export async function get(req: Request, res: Response) {
-  try {
-    const { id: taskId } = req.params
+export const get: any = [
+  authMiddleware,
+  async function get(req: Request, res: Response) {
+    try {
+      const { id: taskId } = req.params
 
-    const task = await getTask(taskId)
-    if (!task) {
-      res.status(404).json({ message: `Task with id ${taskId} not found` })
+      const task = await getTask(taskId)
+      if (!task) {
+        res.status(404).json({ message: `Task with id ${taskId} not found` })
+      }
+
+      res.status(200).json(task)
+    } catch (error: any) {
+      res.status(500).json(error.toString())
     }
-
-    res.status(200).json(task)
-  } catch (error: any) {
-    res.status(500).json(error.toString())
-  }
-}
+  },
+]
 get.apiDoc = {
   tags: ["Tasks"],
   summary: "Get Task",

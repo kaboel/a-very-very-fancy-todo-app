@@ -10,13 +10,13 @@ For more specific instructions on how to setup each applications please navigate
 
 To test the backend endpoints, follow these steps:
 
-1. #### Run the Backend:
+1. **Run the Backend**:
 
    Ensure the backend is running by following the instructions in the platform directory’s README (this directory contains the backend codebase).
 
    Once the backend is up and running, open your browser and navigate to http://localhost:3000/api/docs/swagger. This will load the Swagger UI.
 
-2. #### Test API Endpoints:
+2. **Test API Endpoints**:
 
    The Swagger UI provides an interactive interface where you can test all available backend API endpoints.
 
@@ -32,13 +32,13 @@ To test the backend endpoints, follow these steps:
 
 To test the frontend, follow these steps:
 
-1.  #### Run the Frontend:
+1.  **Run the Frontend**:
 
     - Start the frontend application by following the instructions in the frontend directory’s README (this directory contains the frontend codebase).
 
     - Once the frontend is running, open your browser and navigate to http://localhost:8000. The application will be served at this address.
 
-2.  #### Test User Authentication & Registration:
+2.  **Test User Authentication & Registration**:
 
     - On the frontend, navigate to the Registration page and create a new user account.
 
@@ -46,7 +46,7 @@ To test the frontend, follow these steps:
 
     - After logging in successfully, you will be redirected to the main Dashboard.
 
-3.  #### Test Task Management:
+3.  **Test Task Management**:
 
     - On the Dashboard, you will be able to create new tasks and view existing tasks.
 
@@ -54,10 +54,16 @@ To test the frontend, follow these steps:
 
     - You can also try other task actions like viewing, editing, or deleting tasks.
 
-4.  #### Test Patient and Profile Managements:
+4.  **Test Patient and Profile Managements**:
 
-    - On your left you will see a side bar containing your profile and a naivigation.
+    - On the left side of the screen, you’ll find a sidebar containing your profile and navigation options.
 
-    - On the navigation you should see "Tasks" and "Patients", "Tasks" is where you are now which is the dashboard, and clicking "Patients" will take you to the Patients grid where you can create new patients.
+    - The navigation will show options for "Tasks" and "Patients". The "Tasks" section represents the current dashboard, where you can manage tasks. Clicking on "Patients" will take you to the Patients grid, where you can view, create, and manage patient records.
 
-    - You can also try other patient actions like editing, or deleting tasks.
+    - In the Patients section, you can:
+
+      - Create new patient records.
+
+      - Edit existing patient details.
+
+      - Delete patient records as needed.

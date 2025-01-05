@@ -38,8 +38,6 @@ components:
       $ref: "./schemas/users.schemas/UserUpdateRequest.yaml"
     TaskResource:
       $ref: "./schemas/taskResource.schemas/TaskResource.yaml"
-    ResourceType:
-      $ref: "./schemas/taskResource.schemas/ResourceType.yaml"
     Patient:
       $ref: "./schemas/patient.schemas/Patient.yaml"
     PatientCreateRequest:
