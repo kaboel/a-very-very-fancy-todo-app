@@ -22,12 +22,14 @@ import AuthPaper from "../../components/AuthPaper"
 import { IUserRole } from "../../helpers/types"
 import { fullName } from "../../helpers/miscellaneos"
 import { useRegisterMutation } from "../../redux/apis/authApi"
+import { USER_ROLES } from "../../helpers/constants"
 
 interface IRegisterForm {
   firstname: string
   lastname: string
   email: string
   role: IUserRole
+  specialty?: string
   password: string
   passwordConfirmation: string
 }
@@ -52,12 +54,14 @@ const RegisterPage = () => {
     email,
     role,
     password,
+    specialty,
   }: IRegisterForm) => {
     const name = fullName(firstname, lastname)
-    await register({ name, email, role, password })
+    await register({ name, email, role, password, specialty })
     navigate("/")
   }
 
+  const [showSpecialty, setShowSpecialty] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] =
     useState(false)
@@ -194,7 +198,16 @@ const RegisterPage = () => {
           render={({ field }) => (
             <FormControl size="small" sx={{ mb: 2 }}>
               <InputLabel htmlFor="role">Role</InputLabel>
-              <Select id="role" label="Role" {...field}>
+              <Select
+                id="role"
+                label="Role"
+                onChange={(event) => {
+                  const doctorSelected =
+                    event.target.value === USER_ROLES.DOCTOR
+                  setShowSpecialty(doctorSelected)
+                  field.onChange(event)
+                }}
+              >
                 <MenuItem value="secretary">Secretary</MenuItem>
                 <MenuItem value="nurse">Nurse</MenuItem>
                 <MenuItem value="doctor">Doctor</MenuItem>
@@ -202,6 +215,38 @@ const RegisterPage = () => {
             </FormControl>
           )}
         />
+
+        {showSpecialty && (
+          <Controller
+            control={control}
+            name="specialty"
+            rules={{
+              required: true,
+            }}
+            render={({ field }) => (
+              <FormControl
+                error={!!errors.specialty}
+                size="small"
+                sx={{ mb: 2 }}
+              >
+                <InputLabel htmlFor="email">Specialty</InputLabel>
+                <OutlinedInput
+                  id="email"
+                  label="Email"
+                  value={field.value}
+                  onChange={field.onChange}
+                  type="text"
+                />
+                {/* {errors.email && (
+                <Typography variant="caption" color="error">
+                  {errors.specialty.message}
+                </Typography>
+              )} */}
+              </FormControl>
+            )}
+          />
+        )}
+
         <Divider sx={{ mb: 3, mt: 1 }} />
         <Controller
           control={control}
