@@ -31,7 +31,8 @@ interface ProfileBoxProps {
 export default function ProfileBox({ profile }: ProfileBoxProps) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, email, role, doctorNumber } = profile
+  const { name, email, role, doctorNumber, DoctorSpecialty } = profile
+  const specialty = DoctorSpecialty?.title
 
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false)
   const handleOpenLogoutDialog = () => setOpenLogoutDialog(true)
@@ -63,12 +64,20 @@ export default function ProfileBox({ profile }: ProfileBoxProps) {
       </Avatar>
       <Typography variant="h5">{name}</Typography>
       {role === USER_ROLES.DOCTOR && (
-        <Chip
-          variant="outlined"
-          color="primary"
-          sx={{ fontWeight: "600", mb: 1, mt: 1 }}
-          label={`D-${doctorNumber}`}
-        />
+        <div>
+          <Chip
+            variant="outlined"
+            color="primary"
+            sx={{ fontWeight: "600", mb: 1, mt: 1 }}
+            label={`D-${doctorNumber}`}
+          />
+          <Chip
+            variant="outlined"
+            color="primary"
+            sx={{ fontWeight: "600", mb: 1, mt: 1 }}
+            label={specialty}
+          />
+        </div>
       )}
       <Typography variant="body2"> {email} </Typography>
       <Grid container>
