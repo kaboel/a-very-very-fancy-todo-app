@@ -9,3 +9,5 @@ properties:
     type: string
   role:
     type: string
+  specialty:
+    type: string

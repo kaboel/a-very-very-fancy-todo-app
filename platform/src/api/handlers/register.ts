@@ -18,6 +18,7 @@ export async function post(req: Request, res: Response) {
       role,
       password: passwordHash,
       doctorNumber: null,
+      specialty: req.body?.specialty,
     }
     if (role === USER_ROLES.DOCTOR) {
       userData.doctorNumber = generateDoctorNumber()
