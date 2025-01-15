@@ -13,6 +13,7 @@ export interface IUserRegister {
   password: string
   role: string
   doctorNumber?: number
+  specialty?: string
 }
 
 export interface IUserUpdate {

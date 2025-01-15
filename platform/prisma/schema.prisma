@@ -9,18 +9,20 @@ datasource db {
 }
 
 model User {
-  id           String            @id @default(uuid())
-  name         String
-  email        String            @unique
-  password     String
-  role         String
-  doctorNumber Int?              @unique
-  createdAt    DateTime?         @default(now())
-  updatedAt    DateTime?         @updatedAt
+  id                String            @id @default(uuid())
+  name              String
+  email             String            @unique
+  password          String
+  role              String
+  doctorNumber      Int?              @unique
+  createdAt         DateTime?         @default(now())
+  updatedAt         DateTime?         @updatedAt
   // Relationships
-  patients     PatientOnDoctor[]
-  tasks        Task[]
-  assignments  TaskAssignment[]
+  patients          PatientOnDoctor[]
+  tasks             Task[]
+  assignments       TaskAssignment[]
+  DoctorSpecialty   DoctorSpecialty?  @relation(fields: [doctorSpecialtyId], references: [id])
+  doctorSpecialtyId String?
 }
 
 model Patient {
@@ -87,4 +89,11 @@ model TaskResource {
   createdAt    DateTime? @default(now())
   // Relationships
   task         Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model DoctorSpecialty {
+  id        String    @id @default(uuid())
+  title     String
+  doctors   User[]
+  createdAd DateTime? @default(now())
 }

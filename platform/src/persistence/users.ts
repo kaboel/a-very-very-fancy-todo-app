@@ -1,5 +1,6 @@
-import { PrismaClient, User } from "@prisma/client"
+import { DoctorSpecialty, PrismaClient, User } from "@prisma/client"
 import { IUserProfile, IUserRegister, IUserUpdate } from "./__dtos__/users.dto"
+import Specialty from "./specialty"
 
 const prisma = new PrismaClient()
 
@@ -7,6 +8,10 @@ export class UserPersistence {
   async createUser(data: IUserRegister): Promise<User> {
     const { email, password, name, role, doctorNumber } = data
     try {
+      const DoctorSpecialty = new Specialty()
+      const specialty = await DoctorSpecialty.getSpecialty(
+        data?.specialty || ""
+      )
       return await prisma.user.create({
         data: {
           email,
@@ -14,6 +19,11 @@ export class UserPersistence {
           name,
           role,
           doctorNumber,
+          ...(data.specialty && {
+            DoctorSpecialty: {
+              connect: { id: specialty?.id },
+            },
+          }),
         },
       })
     } catch (error: any) {
@@ -26,6 +36,9 @@ export class UserPersistence {
     try {
       const user = await prisma.user.findUnique({
         where: { id },
+        include: {
+          DoctorSpecialty: true,
+        },
       })
       if (!user) {
         throw new Error(`User with id ${id} not found`)
@@ -40,6 +53,9 @@ export class UserPersistence {
     try {
       const user = await prisma.user.findUnique({
         where: { email },
+        include: {
+          DoctorSpecialty: true,
+        },
       })
 
       if (!user) {
@@ -102,4 +118,22 @@ export class UserPersistence {
       throw new Error(error.toString())
     }
   }
+
+  //
+
+  // async getSpecialty(title: string): Promise<DoctorSpecialty | null> {
+  //   let specialty = await prisma.doctorSpecialty.findFirst({
+  //     where: { title },
+  //   })
+
+  //   if (!specialty) {
+  //     specialty = await prisma.doctorSpecialty.create({
+  //       data: {
+  //         title,
+  //       },
+  //     })
+  //   }
+
+  //   return specialty
+  // }
 }
