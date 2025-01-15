@@ -13,6 +13,7 @@ export interface IUser {
   doctorNumber?: number
   patients?: IPatient[]
   tasks?: ITask[]
+  DoctorSpecialty?: DoctorSpecialty
   assingments?: ITask[]
   createdAt?: string | Date
   updatedAt?: string | Date
@@ -76,4 +77,10 @@ export interface ITaskAssignments {
   taskId: string
   userId: string
   createdAt?: string | Date
+}
+
+export interface DoctorSpecialty {
+  id: string
+  title: string
+  createdAd: Date
 }

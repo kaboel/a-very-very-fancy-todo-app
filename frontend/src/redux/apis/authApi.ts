@@ -11,6 +11,7 @@ interface IRegisterRequest {
   email: string
   role: IUserRole
   password: string
+  specialty?: string
 }
 
 interface ILoginResponse {
